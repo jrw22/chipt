@@ -197,9 +197,11 @@ This is the core normalisation decision (the answer to "what single schema do al
 - **Politeness/reliability:** respect `robots.txt`, rate-limit, set a real User-Agent, cache raw responses, fail soft per-record.
 - **V1:** introduce an `api` ingest type and migrate priority providers to API feeds (see §7).
 
-For MVP the two providers are:
-* https://www.resultsbase.net
-* https://results.runthrough.co.uk
+For MVP the providers are (decided after the §8 feasibility spike):
+* **RaceBest** (https://racebest.com): ingested. Results are embedded as JSON in server-rendered pages.
+* **UKResults** (https://www.ukresults.net): ingested. Static HTML, one page per race per year.
+* RunThrough (https://results.runthrough.co.uk): scraper written but **user-run only**. robots.txt opts out of AI agents, and its data is excluded from future LLM features.
+* resultsbase.net: **blocked**. Results pages sit behind a Cloudflare Turnstile challenge. A stub scraper remains until access is granted.
 
 ### 5.6 Search & identity resolution
 
@@ -258,10 +260,25 @@ For MVP the two providers are:
 - **MVP frontend:** Streamlit; Next.js for V1. §5.9
 - **MVP identity:** single hardcoded profile. §4
 - **MVP deployment:** local-only (Docker Postgres + local FastAPI/Streamlit). §6
-- **MVP providers:** at least 2 — resultsbase.net and results.runthrough.co.uk (feasibility spike in §8). §5.5
+- **MVP providers:** RaceBest and UKResults are ingested. RunThrough is user-run only (AI opt-out in robots.txt). resultsbase is blocked by a Cloudflare challenge. Never bypass bot checks or AI opt-outs. §5.5, §8
 
 ---
 
 ## 8. Provider feasibility spike
 
-> Goal: for candidate results platforms, assess (1) **API vs scrape-only**, (2) **robots.txt / ToS** posture, (3) **static-HTML vs JS-rendered**, and recommend at least 2 MVP providers chosen by data-accessibility. *(In progress.)*
+> Goal: for candidate results platforms, assess (1) **API vs scrape-only**, (2) **robots.txt / ToS** posture, (3) **static-HTML vs JS-rendered**, and recommend at least 2 MVP providers chosen by data-accessibility. **Complete (2026-11-08).**
+
+Acceptance rule: reject any provider whose robots.txt disallows the results paths or opts out of AI agents, whose terms prohibit scraping or reuse, or whose pages sit behind a bot check or CAPTCHA. Prefer JSON or APIs.
+
+| Provider | Verdict | Reason |
+|---|---|---|
+| RaceBest | ✅ MVP | No robots.txt. Terms are silent. JSON embedded in pages. Covers run, triathlon and duathlon |
+| UKResults | ✅ MVP | robots.txt is `Allow: /`. No terms published. Static HTML. Get explicit permission before V2 or public use |
+| RunThrough | ⚠️ User-run only | robots.txt opts out of AI agents. Generic bots are allowed |
+| resultsbase | ❌ Blocked | Cloudflare Turnstile on results pages |
+| RaceResult, Sporthive, Sport Systems | ❌ | robots.txt disallows the results or data paths |
+| Opentrack, Its Your Race, Timeoutdoors, Race Timing Solutions | ❌ | robots.txt opts out of AI agents |
+| Webscorer, Stuweb, RaceSplitter | ❌ | Terms prohibit scraping or copying |
+| RaceTec, Power of 10, SiEntries, Athlinks | ❌ | Cloudflare challenge / login required / no public results / US-centric with unverifiable terms |
+
+Per-provider detail is in `docs/providers/`.
