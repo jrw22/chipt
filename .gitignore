@@ -1,0 +1,69 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+.envrc
+*.pem
+*.key
+*.p12
+*.crt
+credentials*.json
+secrets/
+
+# Claude Code — personal settings (shared settings.json, commands and .mcp.json ARE committed)
+.claude/settings.local.json
+CLAUDE.local.md
+
+# Scraper cache (raw responses)
+.cache/
+
+# Local database data, dumps and exports (contain scraped personal data — names, results)
+pgdata/
+postgres-data/
+data/
+*.dump
+*.sql.gz
+*.backup
+exports/
+
+# Logs
+*.log
+logs/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Playwright (MCP output, traces, screenshots, test reports)
+.playwright-mcp/
+test-results/
+playwright-report/
+playwright/.cache/
+
+# Node / Next.js (V1)
+node_modules/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+.vercel/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
