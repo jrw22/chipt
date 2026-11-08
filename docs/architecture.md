@@ -11,6 +11,7 @@ Chipt is a Python monorepo (`src/chipt/`, managed with uv) with four parts:
 | Ingestion (offline jobs) | httpx + BeautifulSoup | `uv run chipt-ingest <provider>` |
 | Database | PostgreSQL 16 in Docker (`docker-compose.yml`, host port 5433), `pg_trgm`, JSONB | `uv run chipt-initdb` |
 | Backend API | FastAPI + async SQLAlchemy Core (asyncpg), pandas for analysis | `uv run uvicorn chipt.api.main:app --app-dir src` |
+| Frontend (MVP) | Streamlit + Altair; talks to the API over HTTP only | `uv run streamlit run src/chipt/ui/app.py` |
 
 Configuration comes from `.env`, loaded by `chipt.config.Settings` (pydantic-settings). Every variable is documented in `.env.example`.
 
@@ -40,6 +41,18 @@ provider site ──▶ PoliteClient (robots.txt, rate limit, honest UA, retries
   `DEFAULT_ATHLETE_DISPLAY_NAME`.
 
 ## Component Architecture
+
+### Frontend Components
+
+`chipt.ui.app` is a Streamlit multipage app (`st.navigation`). `chipt.ui.api_client` is an httpx
+client that parses responses into `chipt.schemas` models and turns failures into `ApiError`.
+
+- **Find & Claim** (`/find`): a search form with filters from `/filters`, and a results table with a
+  "Mine" checkbox column. Saving sends POST/DELETE `/me/results`.
+- **My Results** (`/my-results`): claimed results, unclaim, and a result-detail expander with the raw payload.
+- **Analysis** (`/analysis`): a comparison-group selector that defaults to the largest group; PB, most
+  recent, vs-PB and trend tiles; an Altair finish-time chart with the PB highlighted; and a pace chart
+  for single-discipline events.
 
 ### API Layer
 

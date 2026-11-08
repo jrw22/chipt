@@ -17,6 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - resultsbase stub scraper, which ingests nothing because results pages are behind Cloudflare Turnstile.
 - Per-provider legal posture and technical notes in `docs/providers/`.
 - FastAPI backend: `/search` (pg_trgm fuzzy name match plus filters), `/results/{id}`, `/me/results` claim/unclaim, `/analysis` (PB, most recent vs PB, pace, linear trend; defaults to the largest comparison group), `/filters`, `/health`.
+- Streamlit UI with three pages: Find & Claim, My Results and Analysis (time-series chart, PB/trend tiles, pace).
 
 ### Changed
 - `.env.example`: Postgres host port is now 5433, so it doesn't clash with a native Postgres on 5432. Added `PROVIDER_RACEBEST_BASE_URL` and `PROVIDER_UKRESULTS_BASE_URL`.

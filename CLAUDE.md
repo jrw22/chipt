@@ -5,7 +5,7 @@
 **Sports covered:** running, cycling, swimming, triathlon (and duathlon).
 
 **MVP scope:**
-- Ingest ≥2 races from each of ≥2 hand-picked providers by scraping. MVP providers: https://www.resultsbase.net and https://results.runthrough.co.uk
+- Ingest ≥2 races from each of ≥2 hand-picked providers by scraping. MVP providers: **RaceBest** (racebest.com) and **UKResults** (ukresults.net). RunThrough is user-run only because of an AI opt-out, and resultsbase is blocked by Cloudflare (see `docs/providers/`)
 - Single user, no authentication: one hardcoded `athlete` row
 - Search results by name (required) plus optional discipline, provider, race name and age group, then **claim** the results that belong to the user
 - Analysis: a time series of the user's headline (chip) results within a comparison group of `(discipline, distance_label)`, e.g. running / 10K
@@ -16,20 +16,32 @@
 
 ## Architecture Overview
 
-Current repo contents (no application code yet):
+Current repo contents:
 ```
 chipt/
 ├── CLAUDE.md
+├── README.md            # setup + run commands
 ├── project_spec.md      # single source of truth for requirements & design
 ├── brainstorm.md        # original goals/milestones notes
+├── pyproject.toml       # uv project; scripts chipt-ingest, chipt-initdb
+├── docker-compose.yml   # Postgres 16 on host port 5433
 ├── .env.example         # all config vars; copy to .env
-├── .gitignore
-└── docs/
-    ├── changelog.md
-    └── project_status.md
+├── docs/
+│   ├── architecture.md  # components, data flow, API, schema
+│   ├── changelog.md
+│   ├── project_status.md
+│   └── providers/       # per-provider legal posture + technical notes
+└── src/chipt/
+    ├── config.py        # settings from .env
+    ├── schemas.py       # canonical Pydantic models + API contract
+    ├── db/              # schema.sql, init, session, ingest_repo (upserts), repository (queries)
+    ├── ingest/          # base.py, http.py (PoliteClient), normalise.py, cli.py, providers/<slug>.py
+    ├── analysis/        # timeseries.py (pandas, pure)
+    ├── api/             # main.py (FastAPI)
+    └── ui/              # app.py + api_client.py (Streamlit)
 ```
 
-Planned components (from `project_spec.md` §5.3):
+Components (from `project_spec.md` §5.3):
 - **Ingestion layer**: one scraper module per provider, run as offline CLI jobs
 - **PostgreSQL**: the canonical store
 - **FastAPI backend**: `/search`, `/results/{id}`, `/me/results` (GET/POST/DELETE), `/analysis`
@@ -90,6 +102,9 @@ race sites → provider scraper (`discover` → `fetch` → `parse` → `upsert`
 - Respect `robots.txt`, rate-limit requests (`SCRAPER_RATE_LIMIT_SECONDS`), and set an honest User-Agent (`SCRAPER_USER_AGENT`)
 - Cache raw responses (`SCRAPER_CACHE_DIR`) and fail softly per record
 - Prefer providers that have APIs or permissive terms
+- **Never bypass bot checks, CAPTCHAs or AI-agent opt-outs in robots.txt** (no browser-spoofing User-Agents, no replaying session cookies). Reject the provider, or have the owner run the scraper when only AI agents are opted out
+- Data from providers that opt out of AI (currently RunThrough) must not be sent to LLM features
+- Run app commands with `src` on the path if `.pth` imports break (see README → Troubleshooting)
 
 **Privacy:** Results are public, but take care when associating them with user accounts (V2+).
 
