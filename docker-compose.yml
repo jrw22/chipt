@@ -1,0 +1,21 @@
+# MVP local database (spec §6). Host port defaults to 5433 to avoid clashing
+# with a natively installed Postgres on 5432; set POSTGRES_PORT in .env to change.
+services:
+  db:
+    image: postgres:16
+    container_name: chipt-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-chipt}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      POSTGRES_DB: ${POSTGRES_DB:-chipt}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-chipt}"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  pgdata:
