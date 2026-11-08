@@ -7,10 +7,11 @@
 - [x] Project scaffold: uv project, Docker Postgres (port 5433), `.env` settings
 - [x] Canonical schema (Pydantic + SQL), idempotent upserts, `pg_trgm` index, seeded single athlete
 - [x] Shared scraper interface, polite HTTP client, normalisation helpers, ingest CLI
+- [x] Backend API: search, claims and analysis, tested end to end on real data
 - [x] **Ingest ≥2 races from ≥2 providers.** RaceBest (12 events, 3,876 results) and UKResults (7 events, 2,537 results). Re-running is idempotent.
 
 ## In progress
-- Backend API, Streamlit UI
+- Streamlit UI
 - RunThrough: the owner runs the scraper by hand (`list` → pin RIds → `dump` → ingest)
 
 ## Next up

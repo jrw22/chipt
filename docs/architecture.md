@@ -10,6 +10,7 @@ Chipt is a Python monorepo (`src/chipt/`, managed with uv) with four parts:
 |---|---|---|
 | Ingestion (offline jobs) | httpx + BeautifulSoup | `uv run chipt-ingest <provider>` |
 | Database | PostgreSQL 16 in Docker (`docker-compose.yml`, host port 5433), `pg_trgm`, JSONB | `uv run chipt-initdb` |
+| Backend API | FastAPI + async SQLAlchemy Core (asyncpg), pandas for analysis | `uv run uvicorn chipt.api.main:app --app-dir src` |
 
 Configuration comes from `.env`, loaded by `chipt.config.Settings` (pydantic-settings). Every variable is documented in `.env.example`.
 
@@ -40,6 +41,30 @@ provider site ──▶ PoliteClient (robots.txt, rate limit, honest UA, retries
 
 ## Component Architecture
 
+### API Layer
+
+`chipt.api.main` (FastAPI). Responses use the models in `chipt.schemas`, and CORS origins come from `CORS_ALLOWED_ORIGINS`.
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/health` | `{"status":"ok"}` |
+| GET | `/search` | `name` (required), `discipline`, `provider` (slug), `race` (substring), `age_group`, `limit`. Returns `SearchResultOut[]` ranked by score |
+| GET | `/results/{id}` | `ResultDetailOut`, including `raw` |
+| GET | `/me/results` | The default athlete's claimed results, newest first |
+| POST | `/me/results` | `{"result_id"}` → 201. Idempotent |
+| DELETE | `/me/results/{id}` | 204. Idempotent |
+| GET | `/analysis` | `discipline` + `distance_label`, or neither for the largest group. 404 if nothing is claimed |
+| GET | `/filters` | Distinct disciplines, providers, races and age groups for the UI dropdowns |
+
+- **Search score:** `GREATEST(similarity(name), word_similarity(name))`. The WHERE clause uses the
+  `%` / `<%` operators, so the GIN trigram index is used. The threshold is
+  `SEARCH_SIMILARITY_THRESHOLD`, applied per transaction.
+- **Analysis:** `chipt.analysis.timeseries.analyse_group` is pure, with no DB access. It returns
+  points sorted by date; pace only when `distance_km` is set; the PB; most recent vs PB; and a trend
+  from a linear fit of seconds against years. The trend is "improving" when the slope is below −1% of
+  the mean time per year and "declining" when it is above +1%. With fewer than 2 points it is
+  "insufficient_data".
+
 ### Library Modules
 
 | Module | Responsibility |
@@ -53,3 +78,6 @@ provider site ──▶ PoliteClient (robots.txt, rate limit, honest UA, retries
 | `chipt.ingest.base` | `BaseScraper` interface (`discover`/`fetch`/`parse`, shared `upsert`/`run`) and `EventRef` |
 | `chipt.ingest.normalise` | Shared normalisation: time → seconds, distance label/km, discipline inference, name cleaning |
 | `chipt.ingest.cli` | Provider registry (`PROVIDERS`) and the `chipt-ingest` command |
+| `chipt.ingest.providers.*` | One isolated scraper per provider (see `docs/providers/`) |
+| `chipt.db.repository` | Read queries: search, claims, comparison groups, filters |
+| `chipt.analysis.timeseries` | Time-series metrics for a comparison group (pandas) |
