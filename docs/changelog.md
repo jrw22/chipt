@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- IRONMAN provider notes (`docs/providers/ironman.md`): not scrapable (`Claude-User` disallowed; terms forbid scraping and database use, as reported), so the route is the official API, with a user-run API spike next.
 - UK results-platform review (`docs/providers/platform_review.md`): about 30 platforms, triathlon-first, each with robots.txt / terms / bot-protection / delivery evidence and an **access route** (direct scrape, user-run, manual import, trace to source, permission, reject), plus a build shortlist and outreach list. Also `docs/providers/britishtriathlon.md` and the phase 2 plan (`docs/v1_phase2_plan.md`).
 - Playwright smoke test (`web/e2e/`, `npm run test:e2e`): dashboard empty state → find → claim → my results → detail → analysis → dashboard PB → remove + undo. It runs on its own ports as a throwaway test athlete (`python -m chipt.db.e2e_fixture`, which refuses the real athlete id), with fixtures from RaceBest only.
 - V1 web app: **Analysis** page (`/analysis`). Comparison-group picker kept in the URL, stat tiles (PB, latest vs PB, trend, races), finish-time and pace charts (crosshair tooltip, PB and latest labelled, clean time ticks), and a table of every race. Empty and unknown-group states.

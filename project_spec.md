@@ -293,7 +293,8 @@ Never bypass bot checks, CAPTCHAs or AI opt-outs. Data from AI-opted-out provide
 | race-results.co.uk (SportSoft) | 1 (shortlist) | Open robots.txt, no terms. Static listing of organisers' PDF/Excel/HTML files |
 | RunThrough, Event Chip Timing | 2 (built) | RaceTec; robots.txt opts out of AI agents, generic bots allowed |
 | Net Timing, Race Timing Solutions, Timing Up North | 2 (cheap via `racetec.py`) | RaceTec; AI opt-out |
-| Its Your Race, Timeoutdoors, IRONMAN, Opentrack, Fetch Everyone, British Cycling | 2 (terms to check) | AI agents opted out |
+| Its Your Race, Timeoutdoors, Opentrack, Fetch Everyone, British Cycling | 2 (terms to check) | AI agents opted out |
+| IRONMAN | 5 → official API (spike next) | `Claude-User` disallowed; terms forbid scraping and database use (as reported); official API portal with sign-up |
 | British Triathlon | 3 (phase 2 step 2) | Cloudflare challenge on every page; robots.txt otherwise allows results |
 | resultsbase, UK Triathlon, Sports Timing Solutions | 3 | Turnstile / Cloudflare / JS+cookie gate (resultsbase also opts out `ClaudeBot`) |
 | Castle Race Series | 4 | Organiser; links to Stuweb (≤2024) and British Triathlon |

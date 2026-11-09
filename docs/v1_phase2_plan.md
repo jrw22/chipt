@@ -2,6 +2,12 @@
 
 > Agreed with the owner on 2026-11-09. Step 1 output: [`providers/platform_review.md`](providers/platform_review.md). Finding: Belvoir's ≤2024 results are on Stuweb (route 5), and 2025–26 only on British Triathlon (route 3), so the timing-company trace doesn't help for recent years. Step 3's route-1 shortlist is **Eventrac** and **race-results.co.uk** (pending owner approval).
 
+## IRONMAN (added 2026-11-09)
+The owner asked about IRONMAN. It's **not scrapable**: `Claude-User` is disallowed, and the terms forbid scraping and database use (as reported). Its route is the **official IRONMAN API**. Order of work:
+1. Platform review + IRONMAN docs (step 1).
+2. **IRONMAN API spike** (`feature/provider-ironman-api`): the owner signs up and checks the API terms, then the agent builds the first `api` provider on the user-run pattern (`probe` prints the response shape only; the owner runs the ingest). See [`providers/ironman.md`](providers/ironman.md).
+3. Steps 2–4 below, unchanged.
+
 ## Context
 V1 phase 1 (the Next.js UI) is complete (PRs #3–#7). The original phase 2 was "shift to API feeds". **The owner has deferred that.** Phase 2 now means:
 1. An **in-depth review of UK results platforms**, with a recommended way to get each one's data.

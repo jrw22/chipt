@@ -13,7 +13,7 @@
 
 - **Triathlon is the hardest sport to get at automatically.** The big triathlon sources are all closed to automated access in some way:
   - British Triathlon, UK Triathlon and Let's Do This are behind Cloudflare.
-  - Its Your Race and Timeoutdoors opt out of AI agents.
+  - Its Your Race and Timeoutdoors opt out of AI agents. IRONMAN disallows `Claude-User`, and its terms forbid scraping (official API instead).
   - Stuweb, Sporthive (MYLAPS) and World Triathlon have terms that forbid copying.
   - RaceResult and Sportsystems block their results paths in robots.txt.
 
@@ -57,7 +57,7 @@ Abbreviations:
 | **Stuweb** (stuweb.co.uk) | Open; no AI opt-out | **"shall not… reproduce… any part of the… site content"** | None | HTML | **5** |
 | **Its Your Race** (itsyourrace.com) | **AI opt-out** (ClaudeBot, GPTBot, CCBot, anthropic-ai, Google-Extended) | Not reviewed | n/a | n/a | **2** (owner-run; terms to check first) |
 | **Timeoutdoors** (timeoutdoors.com) | **AI opt-out** (same set) | Not reviewed | n/a | n/a | **2** (terms first) |
-| **IRONMAN** (ironman.com) | **Claude-User / ChatGPT-User disallowed** | Not reviewed | n/a | JS app (unverified) | **2** (terms first) |
+| **IRONMAN** (ironman.com) | **`Claude-User` / `ChatGPT-User`: `Disallow: /`**; `ClaudeBot`/`GPTBot`/`CCBot` only `/news/`; `*` `Allow: /` | **Claims exclusive IP over results and timing data; bars scraping with robots and putting content into databases/APIs** (as reported by [Slowtwitch](https://slowtwitch.com/triathlon/fyi-your-ironman-athlete-profile-including-photos-is-being-scraped-by-third-parties/); the agent can't read ironman.com). Has had aggregators shut down | n/a | **Official API**: [IRONMAN API Portal](https://developer.competitor.com) (Results / Events / Athlete Data; sign-up; portal also opts out AI agents) | **5 → official API** (see `ironman.md`) |
 | **World Triathlon** (triathlon.org) | Not checked | **Forbids automated data collection without written permission** ([T&Cs](https://triathlon.org/terms-and-conditions)) | n/a | n/a | **5** |
 | **Sports Timing Solutions** (sportstimingsolutions.co.uk) | No AI opt-out, but `*` disallows `/race-result/`, `/export_csv/`, `/rd.php` | No terms page found | **JS + cookie gate** on results ("One moment… Loading your results") | JS | **3** / 5 (gate + robots signal "no bots") |
 | **Sportsystems** (events.sportsystems.co.uk) | **`Disallow: /`** on the results host | Has `/terms-of-use` (not needed) | None | n/a | **5** |
@@ -108,9 +108,11 @@ Abbreviations:
 
 ### Cheap, but user-run (route 2)
 - **Net Timing, Race Timing Solutions and Timing Up North** need only a `BASE_URL` and `CLIENT_ID` each on `racetec.py`, plus a provider doc. The owner runs `dump` and ingest.
-- **Its Your Race, Timeoutdoors and IRONMAN** are big for triathlon, but need their terms reviewed first, and they'd be built blind (no page fetching by the agent).
+- **Its Your Race and Timeoutdoors** are big for triathlon, but need their terms reviewed first, and they'd be built blind (no page fetching by the agent).
+- **IRONMAN** isn't a scraping candidate at all (its terms forbid it). Its route is the **official API**, next up as a spike (see below).
 
 ### Ask permission (route 5): outreach list
+0. **IRONMAN: official API.** The owner signs up at the [IRONMAN API Portal](https://developer.competitor.com) and reads the API terms (personal use? AI-assisted access?). If they're OK, IRONMAN becomes Chipt's first `api` provider, built on the user-run pattern. See `ironman.md`.
 1. **British Triathlon**: results feed or API access. Highest triathlon value.
 2. **Stuweb**, ideally together with **Castle Race Series**: Belvoir ≤2024.
 3. **MYLAPS (Sporthive)**: they have an API. Ask for personal/non-commercial access.

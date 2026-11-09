@@ -27,6 +27,7 @@
 - V1 phase 2, step 1 on `feature/v1-platform-review`: UK results-platform review (`docs/providers/platform_review.md`) with access routes. **Waiting for the owner to approve the route-1 shortlist** (Eventrac, race-results.co.uk)
 
 ## Next up
+- **IRONMAN API spike** (next, owner-paced): the owner signs up at the IRONMAN API Portal and checks the API terms. Then the agent builds the first `api` provider on the user-run pattern (see `docs/providers/ironman.md`)
 - V1 phase 2, step 2: manual-import route (`chipt-import`) + British Triathlon parser. **Owner action:** save the Belvoir results page into `imports/britishtriathlon/`
 - V1 phase 2, steps 3–4: Eventrac and race-results.co.uk scrapers; more RaceBest/UKResults races
 - Later: API feeds (deferred), advanced analysis, better search
