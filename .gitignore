@@ -45,9 +45,6 @@ dist/
 htmlcov/
 .ipynb_checkpoints/
 
-# Streamlit
-.streamlit/secrets.toml
-
 # Playwright (MCP output, traces, screenshots, test reports)
 .playwright-mcp/
 test-results/

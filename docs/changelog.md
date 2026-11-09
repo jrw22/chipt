@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- Playwright smoke test (`web/e2e/`, `npm run test:e2e`): dashboard empty state → find → claim → my results → detail → analysis → dashboard PB → remove + undo. It runs on its own ports as a throwaway test athlete (`python -m chipt.db.e2e_fixture`, which refuses the real athlete id), with fixtures from RaceBest only.
 - V1 web app: **Analysis** page (`/analysis`). Comparison-group picker kept in the URL, stat tiles (PB, latest vs PB, trend, races), finish-time and pace charts (crosshair tooltip, PB and latest labelled, clean time ticks), and a table of every race. Empty and unknown-group states.
 - V1 web app: **Dashboard** (`/`). Totals, a PB card with sparkline per comparison group, recent races, and a welcome empty state.
 - API: `GET /me/summary` returns totals, per-group headline numbers and recent results in one call for the dashboard.
@@ -39,6 +40,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Streamlit UI with three pages: Find & Claim, My Results and Analysis (time-series chart, PB/trend tiles, pace).
 
 ### Changed
+- `CORS_ALLOWED_ORIGINS` now defaults to the web app only (`http://localhost:3000`). Next.js `distDir` can be overridden with `NEXT_DIST_DIR`, so the smoke test's dev server doesn't clash with yours.
 - `.env.example`: Postgres host port is now 5433, so it doesn't clash with a native Postgres on 5432. Added `PROVIDER_RACEBEST_BASE_URL`, `PROVIDER_UKRESULTS_BASE_URL` and `PROVIDER_EVENTCHIPTIMING_BASE_URL`.
 - Analysis (comparison groups and time series) excludes non-finishers. DNFs can still be found, claimed and listed.
 - RunThrough scraper is now a thin subclass of the shared RaceTec base. Behaviour and external ids are unchanged.
+
+### Removed
+- Streamlit UI (`src/chipt/ui/`), the `streamlit` dependency (and Altair with it), and the `STREAMLIT_SERVER_PORT` / `API_BASE_URL` settings. The Next.js app in `web/` replaces it at full parity, except the raw-payload viewer, which was dropped on purpose (raw data is still in the DB and in `/results/{id}`).

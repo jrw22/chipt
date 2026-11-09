@@ -81,7 +81,7 @@ Brings results together into a per-user **hub** of race results, letting the use
 | Language (backend/ingest/analysis) | **Python** | `httpx` + `BeautifulSoup` for static sites, `Playwright` for JS-rendered sites, `pandas` for analysis. |
 | Backend API | **FastAPI** | Async, Pydantic models double as the canonical schema, auto OpenAPI docs. |
 | Database | **PostgreSQL** | See §5.2 for the decision rationale. |
-| Frontend (MVP) | **Streamlit** | See §5.9. |
+| Frontend (MVP) | **Streamlit** (retired in V1 phase 1) | See §5.9. |
 | Frontend (V1+) | **Next.js (React) + TypeScript**, TailwindCSS, shadcn/ui | Charts via Recharts/Visx. |
 | Auth (V2) | FastAPI + JWT, or managed (Clerk / Supabase Auth) | Decide at V2. |
 | LLM (Later) | **Anthropic API (Claude)** behind FastAPI | Use latest Claude models. |
@@ -126,7 +126,7 @@ Brings results together into a per-user **hub** of race results, letting the use
                                        │ HTTP/JSON
                                        ▼
                  ┌─────────────────────────────────────────┐
-                 │  Frontend — Streamlit (MVP) / Next.js (V1)│
+                 │  Frontend — Next.js (V1; Streamlit in MVP)│
                  └─────────────────────────────────────────┘
 ```
 
@@ -250,7 +250,7 @@ For MVP the providers are (decided after the §8 feasibility spike):
 - **Rate limiting & politeness:** throttle requests; identify the client honestly.
 - **Data freshness:** results are final (immutable once published), so caching/periodic ingestion is low-risk.
 - **Privacy:** results are published publicly by providers, but be mindful when (V2+) associating them with user accounts.
-- **Deployment (MVP):** **local-only** — Postgres via Docker, FastAPI + Streamlit run on the dev machine. Hosting (e.g. Fly.io/Railway/Render + managed Postgres) is deferred to V1/V2.
+- **Deployment (MVP/V1 so far):** **local-only** — Postgres via Docker, FastAPI + the Next.js dev server run on the dev machine (Streamlit in the MVP). Hosting (e.g. Fly.io/Railway/Render + managed Postgres) is deferred to V1/V2.
 
 ---
 
@@ -262,7 +262,8 @@ For MVP the providers are (decided after the §8 feasibility spike):
 - **Analysis (MVP):** time series of headline results grouped by `(discipline, distance_label)`. §5.7
 - **Ingestion:** decoupled/scheduled; scrape for MVP → APIs for V1. §5.5
 - **MVP frontend:** Streamlit; Next.js for V1. §5.9
-- **V1 frontend:** Next.js 15 + Tailwind + shadcn/ui, TanStack Query, OpenAPI-generated types; Streamlit retired at parity. §5.9
+- **V1 frontend:** Next.js 15 + Tailwind + shadcn/ui, TanStack Query, OpenAPI-generated types; Streamlit retired at parity (V1 phase 1, done). §5.9
+- **V1 testing:** light automated checks: `npm run check` plus a Playwright smoke test run against the local DB as a throwaway test athlete. §6
 - **MVP identity:** single hardcoded profile. §4
 - **MVP deployment:** local-only (Docker Postgres + local FastAPI/Streamlit). §6
 - **MVP providers:** RaceBest and UKResults are ingested. RunThrough and Event Chip Timing are user-run only (AI opt-out in robots.txt). resultsbase is blocked by a Cloudflare challenge. Never bypass bot checks or AI opt-outs. §5.5, §8

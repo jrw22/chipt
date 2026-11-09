@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Playwright smoke tests
+/.next-e2e/
+/e2e/.fixture.json
+/test-results/
+/playwright-report/

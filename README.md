@@ -28,26 +28,30 @@ Re-running is idempotent. Raw responses are cached in `SCRAPER_CACHE_DIR`, so re
 Per-provider legal posture and notes: [docs/providers/](docs/providers/).
 
 ## Run the app
+Two processes: the FastAPI backend and the Next.js web app (needs Node 22; `nvm use` reads `web/.nvmrc`).
 ```bash
 uv run uvicorn chipt.api.main:app --app-dir src --reload   # API on http://127.0.0.1:8000 (docs at /docs)
-uv run streamlit run src/chipt/ui/app.py            # MVP UI on http://localhost:8501
+cd web && npm install && npm run dev                        # UI on http://localhost:3000
 ```
+Override the API URL with `NEXT_PUBLIC_API_BASE_URL` in `web/.env.local`.
 
-### V1 web app (Next.js, in progress)
-Needs Node 22 (`nvm use` reads `web/.nvmrc`).
+## Checks and tests
 ```bash
 cd web
-npm install
-npm run dev        # http://localhost:3000 (the API must be running; override its URL with NEXT_PUBLIC_API_BASE_URL in web/.env.local)
-npm run check      # typecheck + lint + production build
+npm run check      # typecheck + lint + production build (run before every PR)
+npm run test:e2e   # Playwright smoke test: find → claim → analyse → unclaim
 npm run gen:api    # regenerate TypeScript API types after changing src/chipt/schemas.py or the API
 ```
+The smoke test needs Postgres running with RaceBest ingested (`uv run chipt-ingest racebest`). It starts
+its own API and web servers on ports 8010/3010, so it doesn't clash with your dev servers. It also runs as a
+throwaway test athlete (created and deleted by `python -m chipt.db.e2e_fixture`), so your claims are never
+touched. First run only: `npx playwright install chromium`.
 
 ## Troubleshooting
 - **`ModuleNotFoundError: No module named 'chipt'`** under `uv run`: on macOS the editable-install `.pth`
   file in `.venv` can get the `hidden` flag, and Python ≥3.11.8 skips hidden `.pth` files. Fix with
-  `chflags nohidden .venv/lib/python3.*/site-packages/*.pth`. The API (`--app-dir src`) and the
-  Streamlit app add `src/` to the path themselves, so only the `chipt-*` CLI commands are affected;
+  `chflags nohidden .venv/lib/python3.*/site-packages/*.pth`. The API (`--app-dir src`) adds `src/`
+  to the path itself, so only the `chipt-*` CLI commands are affected;
   `PYTHONPATH=src uv run python -m chipt.ingest.cli <provider>` also works.
 
 ## Layout
@@ -58,6 +62,6 @@ src/chipt/
 ├── db/                  # schema.sql, init, session, ingest_repo (upserts), repository (queries)
 ├── ingest/              # base interface, polite HTTP client, normalise helpers, CLI, providers/
 ├── analysis/            # time-series metrics (pandas)
-├── api/                 # FastAPI app
-└── ui/                  # Streamlit app
+└── api/                 # FastAPI app (+ openapi.py schema export for web/)
+web/                     # Next.js app: app/ routes, components/, lib/api (generated types), e2e/ (Playwright)
 ```
