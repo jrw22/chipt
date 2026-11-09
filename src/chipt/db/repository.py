@@ -18,11 +18,24 @@ from chipt.schemas import (
     SearchResultOut,
 )
 
+# Which kind of time `chip_time_seconds` holds, from what each scraper recorded in `raw`:
+# RaceTec scrapers write `_time_source` (chip|gun); RaceBest/UKResults write the source column
+# name in `_chipt_time_source`. A bare "Time" column doesn't say which, so it's "unspecified".
+_TIME_SOURCE = """
+    CASE
+        WHEN r.raw->>'_time_source' IN ('chip', 'gun') THEN r.raw->>'_time_source'
+        WHEN r.raw->>'_chipt_time_source' IN ('Net Time', 'ChipTime', 'Chip Time') THEN 'chip'
+        WHEN r.raw->>'_chipt_time_source' IN ('Gun Time', 'GunTime') THEN 'gun'
+        ELSE 'unspecified'
+    END
+"""
+
 # Columns shared by every result-shaped query. Expects aliases r/e/p and a
 # bind param :athlete_id for the `claimed` flag.
-_RESULT_COLUMNS = """
+_RESULT_COLUMNS = f"""
     r.id, r.athlete_name, r.gender, r.age_group, r.chip_time_seconds,
     r.overall_rank, r.gender_rank, r.category_rank, r.finisher,
+    {_TIME_SOURCE} AS time_source,
     e.id AS event_id, e.name AS event_name, e.event_date,
     e.discipline::text AS discipline, e.distance_label,
     e.distance_km::float8 AS distance_km, e.location, e.source_url,

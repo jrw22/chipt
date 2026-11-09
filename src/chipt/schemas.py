@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from enum import Enum
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -87,6 +87,9 @@ class ResultOut(BaseModel):
     gender_rank: int | None
     category_rank: int | None
     finisher: bool
+    time_source: Literal["chip", "gun", "unspecified"] = Field(
+        "unspecified", description="What chip_time_seconds holds: chip time, gun time, or a time the race didn't label"
+    )
     event_id: int
     event_name: str
     event_date: date

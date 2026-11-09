@@ -49,6 +49,7 @@ provider site ──▶ PoliteClient (robots.txt, rate limit, honest UA, retries
 - `app/layout.tsx`: shell with a sticky top nav (Dashboard, Find results, My results, Analysis), a mobile sheet menu, a light/dark/system theme toggle, and an API-unreachable banner that polls `/health`.
 - `lib/api/schema.d.ts`: TypeScript types generated from FastAPI's OpenAPI schema (`npm run gen:api`, which runs `uv run chipt-openapi` and then `openapi-typescript`). `lib/api/client.ts`: an `openapi-fetch` client plus `unwrap()`, which turns failures into `ApiError`. `lib/api/hooks.ts`: TanStack Query hooks and query keys.
 - `lib/format.ts`: duration, signed delta, pace and date formatting (ported from the Streamlit helpers).
+- **Find results** (`/find`): `components/find/`. The search (name plus discipline/provider/race/age-group searchable comboboxes from `/filters`) lives in the URL query string, so it can be refreshed, bookmarked and navigated with back/forward. Candidates are grouped by event (events ordered by their best match, rows by score), each with a match %, time (`TimeDisplay` marks gun or unlabelled times), category, position and a DNF badge. Ticking or unticking rows collects changes. A sticky bar then saves them as POST/DELETE `/me/results` calls (`useSaveClaims`), shows a toast, and invalidates every claim-dependent query (`search`, `me`, `analysis`).
 - Pages are client components that fetch through TanStack Query. There are no Next server actions and no direct DB access.
 
 **MVP: Streamlit.**
@@ -78,6 +79,7 @@ client that parses responses into `chipt.schemas` models and turns failures into
 | GET | `/analysis` | `discipline` + `distance_label`, or neither for the largest group. 404 if nothing is claimed |
 | GET | `/filters` | Distinct disciplines, providers, races and age groups for the UI dropdowns |
 
+- **`time_source`** (on every result): `chip`, `gun` or `unspecified`, i.e. what `chip_time_seconds` actually holds. It's derived in SQL (`_TIME_SOURCE` in `chipt.db.repository`) from the raw payload. RaceTec scrapers record `_time_source`, and RaceBest/UKResults record the source column in `_chipt_time_source`. A bare "Time" column becomes `unspecified`.
 - **Search score:** `GREATEST(similarity(name), word_similarity(name))`. The WHERE clause uses the
   `%` / `<%` operators, so the GIN trigram index is used. The threshold is
   `SEARCH_SIMILARITY_THRESHOLD`, applied per transaction.

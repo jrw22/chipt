@@ -227,7 +227,7 @@ For MVP the providers are (decided after the §8 feasibility spike):
 
 | Method | Path | Purpose |
 |---|---|---|
-| GET | `/search` | query params: name, discipline?, provider?, race?, age_group? → ranked candidate results |
+| GET | `/search` | query params: name, discipline?, provider?, race?, age_group? → ranked candidate results (each result carries `time_source`: chip / gun / unspecified) |
 | GET | `/results/{id}` | single result detail |
 | GET | `/me/results` | the user's claimed results |
 | POST | `/me/results` | claim a result (`result_id`) |

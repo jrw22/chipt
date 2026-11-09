@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- V1 web app: **Find results** page (`/find`). Name search plus searchable filters, with the search kept in the URL. Results are grouped by race with match %, time, category, position and DNF badges. Tick/untick to claim or unclaim, then save from a sticky bar with toast feedback. Loading, empty and error states; mobile layout.
+- API: `time_source` (`chip` / `gun` / `unspecified`) on every result, so the UI can say when a time isn't a chip time.
 - V1 Next.js app scaffold in `web/` (Next.js 15, React 19, Tailwind v4, shadcn/ui on Radix with the Nova preset, Node 22). It has an app shell with responsive nav, a light/dark/system theme, an orange accent and an API-unreachable banner, plus placeholder pages for Dashboard, Find results, My results and Analysis.
 - Typed API client for the web app: `uv run chipt-openapi` exports FastAPI's OpenAPI schema, and `npm run gen:api` turns it into TypeScript types used through `openapi-fetch` and TanStack Query.
 - V1 implementation plan (`docs/v1_plan.md`): roadmap for V1 and a detailed plan for phase 1, the Next.js UI.
