@@ -32,25 +32,24 @@ chipt/
 │   ├── project_status.md
 │   ├── v1_plan.md       # V1 roadmap + phase 1 (Next.js UI) plan
 │   └── providers/       # per-provider legal posture + technical notes
-├── web/                 # V1 Next.js app (Node 22, npm): app/ routes, components/ (ui/ = shadcn), lib/api (generated types + client)
+├── web/                 # Next.js UI (Node 22, npm): app/ routes, components/ (ui/ = shadcn), lib/api (generated types + client), e2e/ (Playwright)
 └── src/chipt/
     ├── config.py        # settings from .env
     ├── schemas.py       # canonical Pydantic models + API contract
-    ├── db/              # schema.sql, init, session, ingest_repo (upserts), repository (queries)
+    ├── db/              # schema.sql, init, session, ingest_repo (upserts), repository (queries), e2e_fixture (Playwright test athlete)
     ├── ingest/          # base.py, http.py (PoliteClient), normalise.py, cli.py, providers/<slug>.py (racetec.py = shared RaceTec base)
     ├── analysis/        # timeseries.py (pandas, pure)
-    ├── api/             # main.py (FastAPI), openapi.py (schema export for web/)
-    └── ui/              # app.py + api_client.py (Streamlit, MVP; removed once web/ reaches parity)
+    └── api/             # main.py (FastAPI), openapi.py (schema export for web/)
 ```
 
 Components (from `project_spec.md` §5.3):
 - **Ingestion layer**: one scraper module per provider, run as offline CLI jobs
 - **PostgreSQL**: the canonical store
 - **FastAPI backend**: `/search`, `/results/{id}`, `/me/results` (GET/POST/DELETE), `/analysis`
-- **Frontend**: Streamlit (MVP), replaced by Next.js in V1
+- **Frontend**: Next.js in `web/` (V1). The MVP's Streamlit UI was retired in V1 phase 1
 
 **Data flow:**
-race sites → provider scraper (`discover` → `fetch` → `parse` → `upsert`) → normaliser → PostgreSQL → FastAPI → Streamlit UI
+race sites → provider scraper (`discover` → `fetch` → `parse` → `upsert`) → normaliser → PostgreSQL → FastAPI → Next.js UI
 
 - Ingestion is **decoupled**: scrapers run as offline jobs that write to the DB, never on demand when a user searches. For MVP a "scheduled" job is a manually run CLI script per provider.
 - Upserts are idempotent on `provider_id + external_id`.
@@ -72,8 +71,7 @@ race sites → provider scraper (`discover` → `fetch` → `parse` → `upsert`
 | Backend / ingestion / analysis | Python: `httpx` + `BeautifulSoup` for static sites, `Playwright` for JS-rendered sites, `pandas` for analysis |
 | API | FastAPI (Pydantic models double as the canonical schema) |
 | Database | PostgreSQL with `pg_trgm` and JSONB (chosen over MongoDB; see spec §5.2) |
-| Frontend (MVP) | Streamlit; the UI is throwaway |
-| Frontend (V1+) | Next.js 15 (App Router) + React 19 + TypeScript, Tailwind v4, shadcn/ui (Radix, Nova preset), Recharts. Data fetching: TanStack Query; API types generated from FastAPI's OpenAPI (`openapi-typescript` + `openapi-fetch`); dark mode: `next-themes` |
+| Frontend | Next.js 15 (App Router) + React 19 + TypeScript, Tailwind v4, shadcn/ui (Radix, Nova preset), Recharts. Data fetching: TanStack Query; API types generated from FastAPI's OpenAPI (`openapi-typescript` + `openapi-fetch`); dark mode: `next-themes` |
 | Auth (V2) | FastAPI + JWT, or Clerk / Supabase Auth (decide at V2) |
 | LLM (Later) | Anthropic API (Claude) behind FastAPI |
 
@@ -116,7 +114,7 @@ race sites → provider scraper (`discover` → `fetch` → `parse` → `upsert`
 
 **Dependencies:** Stick to the stack listed above, and justify any new dependency against it.
 
-**Deployment (MVP):** local only. Postgres runs in Docker, and FastAPI and Streamlit run on the dev machine. Hosting is deferred to V1/V2.
+**Deployment:** local only. Postgres runs in Docker, and FastAPI and the Next.js dev server run on the dev machine. Hosting is deferred to V1/V2.
 
 ## Repository Etiquette
 
@@ -144,9 +142,9 @@ race sites → provider scraper (`discover` → `fetch` → `parse` → `upsert`
 
 ## Testing
 
-**MVP approach:** Manual testing (no automated tests yet)
+**Automated (V1, light):** before every PR, `cd web && npm run check` (typecheck + lint + production build) and `npm run test:e2e` (Playwright smoke test of find → claim → analyse → unclaim) must pass. After any API schema change, run `npm run gen:api` and commit the regenerated types. No Python unit tests yet.
 
-**V1 frontend:** `cd web && npm run check` (typecheck + lint + production build) must pass before every PR. Playwright smoke tests arrive in V1 phase 1 step 5. After any API schema change, run `npm run gen:api` and commit the regenerated types.
+**E2E safety:** the smoke test runs as a throwaway athlete (`E2E_ATHLETE_ID`, default 900) on its own ports (API 8010, web 3010), created and deleted by `python -m chipt.db.e2e_fixture`. It refuses the real athlete id. Fixtures come from RaceBest only; never use data from AI-opted-out providers as fixtures.
 
 **Manual test checklist:**
 - [ ] Scraper successfully pulls race results

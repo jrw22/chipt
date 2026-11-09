@@ -21,10 +21,8 @@ class Settings(BaseSettings):
     # API
     api_host: str = "127.0.0.1"
     api_port: int = 8000
-    cors_allowed_origins: str = "http://localhost:8501,http://localhost:3000"
+    cors_allowed_origins: str = "http://localhost:3000"
 
-    # Streamlit
-    api_base_url: str = "http://127.0.0.1:8000"
 
     # MVP identity
     default_athlete_id: int = 1
