@@ -286,6 +286,13 @@ export interface components {
             };
             /** Source Url */
             source_url: string;
+            /**
+             * Time Source
+             * @description What chip_time_seconds holds: chip time, gun time, or a time the race didn't label
+             * @default unspecified
+             * @enum {string}
+             */
+            time_source: "chip" | "gun" | "unspecified";
         };
         /** ResultOut */
         ResultOut: {
@@ -339,6 +346,13 @@ export interface components {
             provider_slug: string;
             /** Source Url */
             source_url: string;
+            /**
+             * Time Source
+             * @description What chip_time_seconds holds: chip time, gun time, or a time the race didn't label
+             * @default unspecified
+             * @enum {string}
+             */
+            time_source: "chip" | "gun" | "unspecified";
         };
         /** SearchResultOut */
         SearchResultOut: {
@@ -397,6 +411,13 @@ export interface components {
             score: number;
             /** Source Url */
             source_url: string;
+            /**
+             * Time Source
+             * @description What chip_time_seconds holds: chip time, gun time, or a time the race didn't label
+             * @default unspecified
+             * @enum {string}
+             */
+            time_source: "chip" | "gun" | "unspecified";
         };
         /** ValidationError */
         ValidationError: {

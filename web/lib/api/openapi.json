@@ -407,6 +407,17 @@
           "source_url": {
             "title": "Source Url",
             "type": "string"
+          },
+          "time_source": {
+            "default": "unspecified",
+            "description": "What chip_time_seconds holds: chip time, gun time, or a time the race didn't label",
+            "enum": [
+              "chip",
+              "gun",
+              "unspecified"
+            ],
+            "title": "Time Source",
+            "type": "string"
           }
         },
         "required": [
@@ -569,6 +580,17 @@
           },
           "source_url": {
             "title": "Source Url",
+            "type": "string"
+          },
+          "time_source": {
+            "default": "unspecified",
+            "description": "What chip_time_seconds holds: chip time, gun time, or a time the race didn't label",
+            "enum": [
+              "chip",
+              "gun",
+              "unspecified"
+            ],
+            "title": "Time Source",
             "type": "string"
           }
         },
@@ -737,6 +759,17 @@
           },
           "source_url": {
             "title": "Source Url",
+            "type": "string"
+          },
+          "time_source": {
+            "default": "unspecified",
+            "description": "What chip_time_seconds holds: chip time, gun time, or a time the race didn't label",
+            "enum": [
+              "chip",
+              "gun",
+              "unspecified"
+            ],
+            "title": "Time Source",
             "type": "string"
           }
         },

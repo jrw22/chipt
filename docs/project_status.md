@@ -17,12 +17,13 @@ Phase 1 is the Next.js UI, replacing Streamlit.
 - [x] Event Chip Timing (RaceTec, user-run): ATW Grafman 2025 + 2026, triathlon and aquabike
 - [x] **MVP complete** (2026-11-09)
 - [x] V1 plan agreed: [docs/v1_plan.md](v1_plan.md)
+- [x] V1 phase 1 step 1: Next.js scaffold (PR #3)
 
 ## In progress
-- V1 phase 1, step 1 built on `feature/v1-web-scaffold`: Next.js shell, theme, generated API client, `npm run check` passing. Next: PR it, then step 2 (Find & Claim)
+- V1 phase 1, step 2 on `feature/v1-find-claim`: Find & Claim page and `time_source` on the API, checked in the browser on real data (claim and unclaim round trip)
 
 ## Next up
-- V1 phase 1, steps 2–5: Find & Claim → My results + detail → Analysis + dashboard → Playwright smoke tests, then retire Streamlit
+- V1 phase 1, steps 3–5: My results + detail → Analysis + dashboard → Playwright smoke tests, then retire Streamlit
 - V1 phases 2–5: API feeds, more providers and races, advanced analysis, better search
 - RunThrough: the owner runs the scraper by hand (`list` → pin RIds → `dump` → ingest)
 
