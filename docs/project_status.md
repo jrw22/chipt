@@ -21,18 +21,21 @@
 - [x] V1 phase 1 step 2: Find & Claim page + `time_source` (PR #4)
 - [x] V1 phase 1 step 3: My results + result detail (PR #5)
 - [x] V1 phase 1 step 4: Analysis + Dashboard + `/me/summary` (PR #6)
-- [x] **V1 phase 1 complete:** Playwright smoke test, Streamlit retired
+- [x] **V1 phase 1 complete:** Playwright smoke test, Streamlit retired (PR #7)
 
 ## In progress
-- V1 phase 1, step 5 on `feature/v1-retire-streamlit`: Playwright smoke test and Streamlit removal
+- V1 phase 2, step 1 on `feature/v1-platform-review`: UK results-platform review (`docs/providers/platform_review.md`) with access routes. **Waiting for the owner to approve the route-1 shortlist** (Eventrac, race-results.co.uk)
 
 ## Next up
-- V1 phase 2: a prioritised list of results platforms with APIs, an `api` ingest type, and migration of priority providers (plan it first)
-- V1 phases 3–5: more providers and races, advanced analysis, better search
+- V1 phase 2, step 2: manual-import route (`chipt-import`) + British Triathlon parser. **Owner action:** save the Belvoir results page into `imports/britishtriathlon/`
+- V1 phase 2, steps 3–4: Eventrac and race-results.co.uk scrapers; more RaceBest/UKResults races
+- Later: API feeds (deferred), advanced analysis, better search
 - RunThrough: the owner runs the scraper by hand (`list` → pin RIds → `dump` → ingest)
 
 ## Blockers / open questions
-- **resultsbase.net** is blocked by Cloudflare Turnstile. Next step: ask info@resultsbase.net for access or a feed.
+- **resultsbase.net** is blocked by Cloudflare Turnstile and now also opts out `ClaudeBot`/`GPTBot`. Route: manual import, or ask for access.
+- **British Triathlon** (the owner's priority for triathlon) is behind Cloudflare on every page. Route: manual import (phase 2 step 2); ask for a feed before V2.
+- **Outreach list** (British Triathlon, Stuweb + Castle Race Series, MYLAPS, RaceResult, UK Athletics): see `platform_review.md`. Not sent yet; the owner decides.
 - **RunThrough** has opted out of AI agents. The owner runs the scraper, and its data stays out of LLM features. Asking for a feed is still the cleanest route.
 - **Event Chip Timing** has the same AI-agent opt-out as RunThrough (both are RaceTec sites), so the same rules apply. Still unverified: whether the `StartPage.aspx` listing exists on this site. The site publishes gun time only, with no chip time.
 - **UKResults** publishes no terms. Get explicit permission before V2 or public use.

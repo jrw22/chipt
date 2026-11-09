@@ -263,6 +263,7 @@ For MVP the providers are (decided after the §8 feasibility spike):
 - **Ingestion:** decoupled/scheduled; scrape for MVP → APIs for V1. §5.5
 - **MVP frontend:** Streamlit; Next.js for V1. §5.9
 - **V1 frontend:** Next.js 15 + Tailwind + shadcn/ui, TanStack Query, OpenAPI-generated types; Streamlit retired at parity (V1 phase 1, done). §5.9
+- **V1 phase 2 (2026-11-09):** the shift to API feeds is **deferred**. Phase 2 is instead a results-platform review with **access routes** (direct scrape / user-run / manual import / trace to source / permission / reject), a manual-import path (British Triathlon first), and 2–3 more route-1 providers. §8
 - **V1 testing:** light automated checks: `npm run check` plus a Playwright smoke test run against the local DB as a throwaway test athlete. §6
 - **MVP identity:** single hardcoded profile. §4
 - **MVP deployment:** local-only (Docker Postgres + local FastAPI/Streamlit). §6
@@ -272,20 +273,32 @@ For MVP the providers are (decided after the §8 feasibility spike):
 
 ## 8. Provider feasibility spike
 
-> Goal: for candidate results platforms, assess (1) **API vs scrape-only**, (2) **robots.txt / ToS** posture, (3) **static-HTML vs JS-rendered**, and recommend at least 2 MVP providers chosen by data-accessibility. **Complete (2026-11-08).**
+> Goal: for candidate results platforms, assess (1) **API vs scrape-only**, (2) **robots.txt / ToS** posture, (3) **static-HTML vs JS-rendered**, and recommend at least 2 MVP providers chosen by data-accessibility. **MVP spike complete (2026-11-08); extended into a UK triathlon-first review with access routes in V1 phase 2 (2026-11-09).**
 
-Acceptance rule: reject any provider whose robots.txt disallows the results paths or opts out of AI agents, whose terms prohibit scraping or reuse, or whose pages sit behind a bot check or CAPTCHA. Prefer JSON or APIs.
+**Access routes (V1 phase 2, 2026-11-09).** These replace the MVP's binary acceptance rule. Every platform gets one route, and the full review with evidence is in [`docs/providers/platform_review.md`](docs/providers/platform_review.md):
+1. **Direct scrape**: robots.txt allows the results paths, including AI agents; terms silent/permissive; no bot check. Claude builds and runs it.
+2. **User-run scrape**: AI agents opted out, generic bots allowed. Claude writes it without fetching results pages; the owner runs it.
+3. **Manual import**: bot check or login. The owner saves the page or export in a normal browser, and `chipt-import` parses it. Personal use only.
+4. **Trace to source**: aggregators and governing bodies. Use the original publisher's route.
+5. **Ask permission / feed**: terms forbid copying or automated access; also required for V2/public use.
+6. **Reject.**
 
-| Provider | Verdict | Reason |
+Never bypass bot checks, CAPTCHAs or AI opt-outs. Data from AI-opted-out providers never goes to LLM features or test fixtures.
+
+| Provider | Route | Reason |
 |---|---|---|
-| RaceBest | ✅ MVP | No robots.txt. Terms are silent. JSON embedded in pages. Covers run, triathlon and duathlon |
-| UKResults | ✅ MVP | robots.txt is `Allow: /`. No terms published. Static HTML. Get explicit permission before V2 or public use |
-| RunThrough | ⚠️ User-run only | robots.txt opts out of AI agents. Generic bots are allowed |
-| Event Chip Timing | ⚠️ User-run only | Same RaceTec robots.txt as RunThrough (AI agents opted out, generic bots allowed). No terms found. Checked 2026-11-09 |
-| resultsbase | ❌ Blocked | Cloudflare Turnstile on results pages |
-| RaceResult, Sporthive, Sport Systems | ❌ | robots.txt disallows the results or data paths |
-| Opentrack, Its Your Race, Timeoutdoors, Race Timing Solutions | ❌ | robots.txt opts out of AI agents |
-| Webscorer, Stuweb, RaceSplitter | ❌ | Terms prohibit scraping or copying |
-| RaceTec, Power of 10, SiEntries, Athlinks | ❌ | Cloudflare challenge / login required / no public results / US-centric with unverifiable terms |
+| RaceBest | 1 (built) | No robots.txt. Terms silent. JSON embedded in pages |
+| UKResults | 1 (built) | `Allow: /`. No terms published. Static HTML. Get permission before V2 |
+| Eventrac | 1 (shortlist) | Open robots.txt, silent terms. Hosted results are static HTML, whole field per page |
+| race-results.co.uk (SportSoft) | 1 (shortlist) | Open robots.txt, no terms. Static listing of organisers' PDF/Excel/HTML files |
+| RunThrough, Event Chip Timing | 2 (built) | RaceTec; robots.txt opts out of AI agents, generic bots allowed |
+| Net Timing, Race Timing Solutions, Timing Up North | 2 (cheap via `racetec.py`) | RaceTec; AI opt-out |
+| Its Your Race, Timeoutdoors, IRONMAN, Opentrack, Fetch Everyone, British Cycling | 2 (terms to check) | AI agents opted out |
+| British Triathlon | 3 (phase 2 step 2) | Cloudflare challenge on every page; robots.txt otherwise allows results |
+| resultsbase, UK Triathlon, Sports Timing Solutions | 3 | Turnstile / Cloudflare / JS+cookie gate (resultsbase also opts out `ClaudeBot`) |
+| Castle Race Series | 4 | Organiser; links to Stuweb (≤2024) and British Triathlon |
+| Stuweb, Sporthive (MYLAPS), Webscorer, World Triathlon | 5 | Terms forbid copying or automated collection |
+| RaceResult, Sportsystems, Power of 10 / runbritain, Athlinks | 5 | robots.txt disallows results / login required / terms unverifiable |
+| Let's Do This, SiEntries | 6 | Entry platforms, not results sources (and bot-checked) |
 
 Per-provider detail is in `docs/providers/`.
