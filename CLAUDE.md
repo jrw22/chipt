@@ -5,7 +5,7 @@
 **Sports covered:** running, cycling, swimming, triathlon (and duathlon).
 
 **MVP scope:**
-- Ingest ≥2 races from each of ≥2 hand-picked providers by scraping. MVP providers: **RaceBest** (racebest.com) and **UKResults** (ukresults.net). RunThrough is user-run only because of an AI opt-out, and resultsbase is blocked by Cloudflare (see `docs/providers/`)
+- Ingest ≥2 races from each of ≥2 hand-picked providers by scraping. MVP providers: **RaceBest** (racebest.com) and **UKResults** (ukresults.net). RunThrough and Event Chip Timing are user-run only because of an AI opt-out, and resultsbase is blocked by Cloudflare (see `docs/providers/`)
 - Single user, no authentication: one hardcoded `athlete` row
 - Search results by name (required) plus optional discipline, provider, race name and age group, then **claim** the results that belong to the user
 - Analysis: a time series of the user's headline (chip) results within a comparison group of `(discipline, distance_label)`, e.g. running / 10K
@@ -35,7 +35,7 @@ chipt/
     ├── config.py        # settings from .env
     ├── schemas.py       # canonical Pydantic models + API contract
     ├── db/              # schema.sql, init, session, ingest_repo (upserts), repository (queries)
-    ├── ingest/          # base.py, http.py (PoliteClient), normalise.py, cli.py, providers/<slug>.py
+    ├── ingest/          # base.py, http.py (PoliteClient), normalise.py, cli.py, providers/<slug>.py (racetec.py = shared RaceTec base)
     ├── analysis/        # timeseries.py (pandas, pure)
     ├── api/             # main.py (FastAPI)
     └── ui/              # app.py + api_client.py (Streamlit)
@@ -103,7 +103,7 @@ race sites → provider scraper (`discover` → `fetch` → `parse` → `upsert`
 - Cache raw responses (`SCRAPER_CACHE_DIR`) and fail softly per record
 - Prefer providers that have APIs or permissive terms
 - **Never bypass bot checks, CAPTCHAs or AI-agent opt-outs in robots.txt** (no browser-spoofing User-Agents, no replaying session cookies). Reject the provider, or have the owner run the scraper when only AI agents are opted out
-- Data from providers that opt out of AI (currently RunThrough) must not be sent to LLM features
+- Data from providers that opt out of AI (currently RunThrough and Event Chip Timing) must not be sent to LLM features
 - Run app commands with `src` on the path if `.pth` imports break (see README → Troubleshooting)
 
 **Privacy:** Results are public, but take care when associating them with user accounts (V2+).

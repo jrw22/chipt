@@ -201,6 +201,7 @@ For MVP the providers are (decided after the §8 feasibility spike):
 * **RaceBest** (https://racebest.com): ingested. Results are embedded as JSON in server-rendered pages.
 * **UKResults** (https://www.ukresults.net): ingested. Static HTML, one page per race per year.
 * RunThrough (https://results.runthrough.co.uk): scraper written but **user-run only**. robots.txt opts out of AI agents, and its data is excluded from future LLM features.
+* Event Chip Timing (https://results.eventchiptiming.com): scraper written but **user-run only**. It's a RaceTec site with the same AI-agent opt-out as RunThrough, and both share one RaceTec base scraper.
 * resultsbase.net: **blocked**. Results pages sit behind a Cloudflare Turnstile challenge. A stub scraper remains until access is granted.
 
 ### 5.6 Search & identity resolution
@@ -260,7 +261,7 @@ For MVP the providers are (decided after the §8 feasibility spike):
 - **MVP frontend:** Streamlit; Next.js for V1. §5.9
 - **MVP identity:** single hardcoded profile. §4
 - **MVP deployment:** local-only (Docker Postgres + local FastAPI/Streamlit). §6
-- **MVP providers:** RaceBest and UKResults are ingested. RunThrough is user-run only (AI opt-out in robots.txt). resultsbase is blocked by a Cloudflare challenge. Never bypass bot checks or AI opt-outs. §5.5, §8
+- **MVP providers:** RaceBest and UKResults are ingested. RunThrough and Event Chip Timing are user-run only (AI opt-out in robots.txt). resultsbase is blocked by a Cloudflare challenge. Never bypass bot checks or AI opt-outs. §5.5, §8
 
 ---
 
@@ -275,6 +276,7 @@ Acceptance rule: reject any provider whose robots.txt disallows the results path
 | RaceBest | ✅ MVP | No robots.txt. Terms are silent. JSON embedded in pages. Covers run, triathlon and duathlon |
 | UKResults | ✅ MVP | robots.txt is `Allow: /`. No terms published. Static HTML. Get explicit permission before V2 or public use |
 | RunThrough | ⚠️ User-run only | robots.txt opts out of AI agents. Generic bots are allowed |
+| Event Chip Timing | ⚠️ User-run only | Same RaceTec robots.txt as RunThrough (AI agents opted out, generic bots allowed). No terms found. Checked 2026-11-09 |
 | resultsbase | ❌ Blocked | Cloudflare Turnstile on results pages |
 | RaceResult, Sporthive, Sport Systems | ❌ | robots.txt disallows the results or data paths |
 | Opentrack, Its Your Race, Timeoutdoors, Race Timing Solutions | ❌ | robots.txt opts out of AI agents |

@@ -3,7 +3,8 @@
 - Results site: https://results.runthrough.co.uk (a RaceTec-hosted results platform, https://www.racetec.net)
 - Organiser site: https://www.runthrough.co.uk (operated by GW Active Ltd, trading as RunThrough Events)
 - Status: **Scraper written but not run against the site; the project owner must run it by hand.** The owner chose option (a) below.
-  `src/chipt/ingest/providers/runthrough.py` was written without fetching any results pages and
+  `src/chipt/ingest/providers/runthrough.py` (a thin subclass of the shared RaceTec scraper in
+  `racetec.py`, also used by [Event Chip Timing](eventchiptiming.md)) was written without fetching any results pages and
   has only been tested offline on synthetic HTML. A person (not an AI agent) runs it, using the
   honest `SCRAPER_USER_AGENT`. Data from this provider must be excluded from future LLM features.
   Workflow: `python -m chipt.ingest.providers.runthrough list` → pin RIds in `RACES` →

@@ -84,10 +84,13 @@ def normalise_distance(
     """
     blob = " ".join(t for t in texts if t)
     if discipline not in SINGLE_DISCIPLINES:
+        # Aquabike (swim + bike, no run) is filed under triathlon but must never be compared
+        # with a triathlon of the same distance, so it gets its own labels.
+        prefix = "Aquabike " if re.search(r"aqua\s*bike", blob, re.I) else ""
         for pattern, label in _MULTI_DISTANCES[::-1] if "super" in blob.lower() else _MULTI_DISTANCES:
             if pattern.search(blob):
-                return label, None
-        return None, None
+                return prefix + label, None
+        return (prefix.strip() or None), None
     if discipline == Discipline.running:
         for pattern, label, km in _RUN_DISTANCES:
             if pattern.search(blob):
