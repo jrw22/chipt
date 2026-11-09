@@ -49,7 +49,9 @@ provider site ──▶ PoliteClient (robots.txt, rate limit, honest UA, retries
 - `app/layout.tsx`: shell with a sticky top nav (Dashboard, Find results, My results, Analysis), a mobile sheet menu, a light/dark/system theme toggle, and an API-unreachable banner that polls `/health`.
 - `lib/api/schema.d.ts`: TypeScript types generated from FastAPI's OpenAPI schema (`npm run gen:api`, which runs `uv run chipt-openapi` and then `openapi-typescript`). `lib/api/client.ts`: an `openapi-fetch` client plus `unwrap()`, which turns failures into `ApiError`. `lib/api/hooks.ts`: TanStack Query hooks and query keys.
 - `lib/format.ts`: duration, signed delta, pace and date formatting (ported from the Streamlit helpers).
-- **Find results** (`/find`): `components/find/`. The search (name plus discipline/provider/race/age-group searchable comboboxes from `/filters`) lives in the URL query string, so it can be refreshed, bookmarked and navigated with back/forward. Candidates are grouped by event (events ordered by their best match, rows by score), each with a match %, time (`TimeDisplay` marks gun or unlabelled times), category, position and a DNF badge. Ticking or unticking rows collects changes. A sticky bar then saves them as POST/DELETE `/me/results` calls (`useSaveClaims`), shows a toast, and invalidates every claim-dependent query (`search`, `me`, `analysis`).
+- **Find results** (`/find`): `components/find/`. The search (name plus discipline/provider/race/age-group searchable comboboxes from `/filters`) lives in the URL query string, so it can be refreshed, bookmarked and navigated with back/forward. Candidates are grouped by event (events ordered by their best match, rows by score), each with a match %, time (`TimeDisplay` marks gun or unlabelled times), category, position and a DNF badge. Ticking or unticking rows collects changes. A sticky bar then saves them as POST/DELETE `/me/results` calls (`useSaveClaims`), shows a toast, and invalidates every claim-dependent query (`search`, `me`, `analysis`, `result`).
+- **My results** (`/results`): `components/results/`. The claimed results are shown as a sortable table on desktop (date, race, time) and as cards on mobile, with a discipline filter. The filter and sort live in the URL. Remove is immediate, with an Undo action on the toast (`useUnclaimWithUndo`) instead of a confirm dialog.
+- **Result detail** (`/results/[id]`): time (chip/gun aware) and pace, plus overall/gender/category positions as "N of M" with "Top X%". Claim/remove toggle, a "Compare" link to the analysis for that comparison group, and a link to the provider's page. The raw payload is not shown (splits are out of scope).
 - Pages are client components that fetch through TanStack Query. There are no Next server actions and no direct DB access.
 
 **MVP: Streamlit.**
@@ -72,7 +74,7 @@ client that parses responses into `chipt.schemas` models and turns failures into
 |---|---|---|
 | GET | `/health` | `{"status":"ok"}` |
 | GET | `/search` | `name` (required), `discipline`, `provider` (slug), `race` (substring), `age_group`, `limit`. Returns `SearchResultOut[]` ranked by score |
-| GET | `/results/{id}` | `ResultDetailOut`, including `raw` |
+| GET | `/results/{id}` | `ResultDetailOut`, including `raw` and field sizes for "N of M": `event_finishers`, `gender_finishers`, `category_finishers` (finishers only; gender/category are null when the result has none) |
 | GET | `/me/results` | The default athlete's claimed results, newest first |
 | POST | `/me/results` | `{"result_id"}` → 201. Idempotent |
 | DELETE | `/me/results/{id}` | 204. Idempotent |

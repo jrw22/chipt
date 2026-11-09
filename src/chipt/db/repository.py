@@ -115,10 +115,22 @@ async def search_results(
     return [SearchResultOut(**_row_to_dict(r)) for r in rows]
 
 
+# Field sizes for one result's event (finishers only), for "N of M" positions.
+_FIELD_SIZES = """
+    (SELECT count(*) FROM result x WHERE x.event_id = r.event_id AND x.finisher) AS event_finishers,
+    CASE WHEN r.gender IS NULL OR r.gender = '' THEN NULL ELSE
+        (SELECT count(*) FROM result x WHERE x.event_id = r.event_id AND x.finisher AND x.gender = r.gender)
+    END AS gender_finishers,
+    CASE WHEN r.age_group IS NULL OR r.age_group = '' THEN NULL ELSE
+        (SELECT count(*) FROM result x WHERE x.event_id = r.event_id AND x.finisher AND x.age_group = r.age_group)
+    END AS category_finishers
+"""
+
+
 async def get_result(conn: AsyncConnection, result_id: int, athlete_id: int) -> ResultDetailOut | None:
     row = (
         await conn.execute(
-            text(f"SELECT {_RESULT_COLUMNS}, r.raw {_FROM} WHERE r.id = :id"),
+            text(f"SELECT {_RESULT_COLUMNS}, r.raw, {_FIELD_SIZES} {_FROM} WHERE r.id = :id"),
             {"id": result_id, "athlete_id": athlete_id},
         )
     ).first()
@@ -153,7 +165,7 @@ async def claim_result(conn: AsyncConnection, athlete_id: int, result_id: int) -
         {"a": athlete_id, "r": result_id},
     )
     detail = await get_result(conn, result_id, athlete_id)
-    return ResultOut(**detail.model_dump(exclude={"raw"})) if detail else None
+    return ResultOut(**detail.model_dump(include=set(ResultOut.model_fields))) if detail else None
 
 
 async def unclaim_result(conn: AsyncConnection, athlete_id: int, result_id: int) -> None:

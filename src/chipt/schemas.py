@@ -109,6 +109,12 @@ class SearchResultOut(ResultOut):
 
 class ResultDetailOut(ResultOut):
     raw: dict[str, Any] = Field(default_factory=dict)
+    # Field sizes for "N of M" positions. Finishers only (DNFs excluded).
+    event_finishers: int = Field(0, description="Finishers in this event")
+    gender_finishers: int | None = Field(None, description="Finishers in this event with the same gender; null if no gender")
+    category_finishers: int | None = Field(
+        None, description="Finishers in this event with the same age group; null if no age group"
+    )
 
 
 class ClaimIn(BaseModel):

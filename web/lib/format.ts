@@ -26,6 +26,24 @@ export function formatPace(secondsPerKm: number | null | undefined): string {
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")} /km`;
 }
 
+/** Seconds per km for single-discipline results (distance_km is null for multi-sport). */
+export function paceOf(r: { chip_time_seconds: number; distance_km?: number | null }): number | null {
+  return r.distance_km ? r.chip_time_seconds / r.distance_km : null;
+}
+
+/** 1 -> "1st", 22 -> "22nd", 113 -> "113th". */
+export function ordinal(n: number): string {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return `${n}${s[(v - 20) % 10] || s[v] || s[0]}`;
+}
+
+/** Position as a share of the field, rounded up: 12 of 154 -> "Top 8%"; 1st -> "Winner". */
+export function topPercent(rank: number, of: number): string {
+  if (rank === 1) return "Winner";
+  return `Top ${Math.max(1, Math.ceil((rank / of) * 100))}%`;
+}
+
 /** ISO date ("2025-06-01") -> "1 Jun 2025", without timezone drift. */
 export function formatDate(iso: string): string {
   const [y, m, d] = iso.split("-").map(Number);
