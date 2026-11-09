@@ -87,8 +87,11 @@ _DISTANCE_MENTION = re.compile(
     r"\bhalf[\s-]*marathon\b|\bmarathon\b|\bultra\b|\b\d+(?:\.\d+)?\s*(?:k|km|mile|miles|mi)\b", re.I
 )
 _POSTBACK = re.compile(r"__doPostBack\('([^']+)','Page\$(\d+)'\)")
+_POSTBACK_ANY = re.compile(r"__doPostBack\(\s*'([^']*)'\s*,\s*'([^']*)'\s*\)")
+_PAGE_PARAM = re.compile(r"^(?:page|pageno|pagenum|pagenumber|pg|p|pn)$", re.I)
 _RANK_PAIR = re.compile(r"^\s*(\d+)\s*\(\s*(\d+)\s*\)\s*$")
 _TIME_SHAPE = re.compile(r"^\d{1,2}(?::\d{2}){1,2}(?:[.,]\d+)?$")
+_TIME_TOKEN = re.compile(r"\b\d{1,2}(?::\d{2}){1,2}(?:[.,]\d+)?\b")
 # Sub-event link labels that say nothing about the distance.
 _GENERIC_SUB_EVENT = {"", "results", "result", "overall", "all", "all results"}
 
@@ -154,8 +157,23 @@ def find_results_table(soup: BeautifulSoup) -> tuple[Tag | None, list[str], dict
     return best[1], best[2], best[3]
 
 
+def field_columns(headers: list[str]) -> dict[str, list[int]]:
+    """Canonical field -> every column index with that header (sites repeat e.g. Name / Gun Time)."""
+    cols: dict[str, list[int]] = defaultdict(list)
+    for i, h in enumerate(headers):
+        field = _HEADER_TO_FIELD.get(_norm_header(h))
+        if field:
+            cols[field].append(i)
+    return dict(cols)
+
+
 def parse_rows(table: Tag, headers: list[str], mapping: dict[int, str]) -> list[dict]:
-    """Return one dict per data row: canonical fields plus `_raw` (header -> cell text)."""
+    """Return one dict per data row: canonical fields plus `_raw` (header -> cell text).
+
+    When a header repeats, each field takes the first NON-EMPTY of its columns, so a
+    blank duplicate (e.g. a hidden mobile-layout copy) can't wipe out the value.
+    """
+    cols = field_columns(headers) or {f: [i] for i, f in mapping.items()}
     rows = []
     for tr in table.find_all("tr"):
         cells = tr.find_all("td")
@@ -164,7 +182,8 @@ def parse_rows(table: Tag, headers: list[str], mapping: dict[int, str]) -> list[
         texts = [_text(c) for c in cells]
         if _POSTBACK.search(str(tr)):  # GridView pager row
             continue
-        row = {field: texts[i] for i, field in mapping.items() if i < len(texts)}
+        row = {field: next((texts[i] for i in idxs if i < len(texts) and texts[i]), "")
+               for field, idxs in cols.items()}
         row["_raw"] = {(headers[i] if i < len(headers) and headers[i] else f"col{i}"): t
                        for i, t in enumerate(texts)}
         rows.append(row)
@@ -212,6 +231,57 @@ def split_rank_pair(value: str | None) -> tuple[int | None, int | None]:
     return to_int(value) if value and value.strip().isdigit() else None, None
 
 
+def _page_number(text: str, *candidates: str | None) -> int | None:
+    """Page number from a pager link: its text if numeric, else a number in its argument/params."""
+    if text.isdigit():
+        return int(text)
+    for c in candidates:
+        m = re.search(r"(\d+)\s*$", c or "")
+        if m:
+            return int(m.group(1))
+    return None
+
+
+def pager_links(soup: BeautifulSoup, page_url: str, rid: str) -> list[dict]:
+    """Every link that looks like a results-pager link for the same race.
+
+    Handles the usual ASP.NET styles: plain GET links with a page parameter
+    (`...&PageNo=2`), `__doPostBack('<target>','Page$2')` (or any argument) in href or
+    onclick. Returns [{page, kind: "get"|"post", url | target+argument}], sorted by page.
+    """
+    path = urlsplit(page_url).path.lower()
+    found: dict[int, dict] = {}
+    for a in soup.find_all("a"):
+        text = _text(a)
+        href, onclick = a.get("href") or "", a.get("onclick") or ""
+        pb = _POSTBACK_ANY.search(href) or _POSTBACK_ANY.search(onclick)
+        if pb:
+            target, arg = pb.groups()
+            n = _page_number(text, arg)
+            if n and (arg.lower().startswith("page$") or text.isdigit()):
+                found.setdefault(n, {"page": n, "kind": "post", "target": target, "argument": arg})
+            continue
+        if not href or href.startswith(("javascript", "#", "mailto")):
+            continue
+        full = urljoin(page_url, href)
+        if urlsplit(full).path.lower() != path or query_param(full, "RId") not in (rid, None):
+            continue
+        params = {k: v[0] for k, v in parse_qs(urlsplit(full).query).items()}
+        page_vals = [v for k, v in params.items() if _PAGE_PARAM.match(k)]
+        if not page_vals and not text.isdigit():
+            continue
+        n = _page_number(text, *page_vals)
+        if n and (page_vals or text.isdigit()):
+            found.setdefault(n, {"page": n, "kind": "get", "url": full})
+    return [found[k] for k in sorted(found)]
+
+
+def cell_time_seconds(value: str | None) -> int | None:
+    """Seconds from a time cell, tolerating extra text around the time (e.g. '05:15:00 *')."""
+    m = _TIME_TOKEN.search(value or "")
+    return parse_time_to_seconds(m.group()) if m else None
+
+
 def cell_shape(value: str) -> str:
     """Describe a cell without revealing it, so `dump` output can be shared safely."""
     v = value.strip()
@@ -243,6 +313,12 @@ def sub_event_links(soup: BeautifulSoup, page_url: str, rid: str) -> list[tuple[
         if eid and query_param(full, "RId") == rid and eid not in seen:
             seen[eid] = (eid, _text(a), full)
     return sorted(seen.values(), key=lambda t: (len(t[0]), t[0]))
+
+
+def _table_fingerprint(html: str) -> int:
+    """Hash of a page's results-table rows, to spot a pager that returns the same page."""
+    table, _, _ = find_results_table(BeautifulSoup(html, "html.parser"))
+    return hash(_text(table)) if table is not None else hash(html)
 
 
 # --------------------------------------------------------------------------- #
@@ -333,27 +409,36 @@ class RaceTecScraper(BaseScraper):
 
     # -- fetch: page 1 plus ASP.NET GridView postback pages ------------------- #
     def fetch(self, ref: EventRef) -> list[str]:
+        """Page 1, then follow the pager (GET links or ASP.NET postbacks) until it runs out."""
         pages = [self.http.get(ref.url)]
-        current = 1
+        page_url, current = ref.url, 1
+        seen_bodies = {_table_fingerprint(pages[0])}
         while len(pages) < MAX_RESULT_PAGES:
             soup = BeautifulSoup(pages[-1], "html.parser")
             # Next page = smallest page number greater than the current one (handles "..." links).
-            targets = sorted(
-                (int(n), target) for target, n in _POSTBACK.findall(str(soup)) if int(n) > current
-            )
-            if not targets:
+            nxt = next((p for p in pager_links(soup, page_url, ref.meta.get("rid", "")) if p["page"] > current), None)
+            if nxt is None:
                 break
-            n, target = targets[0]
-            form = soup.find("form")
-            fields = {
-                inp["name"]: inp.get("value", "")
-                for inp in (form or soup).find_all("input", attrs={"type": "hidden"})
-                if inp.get("name")
-            }
-            fields.update({"__EVENTTARGET": target, "__EVENTARGUMENT": f"Page${n}"})
-            action = urljoin(ref.url, form.get("action")) if form and form.get("action") else ref.url
-            pages.append(self.http.post(action, data=fields))
-            current = n
+            if nxt["kind"] == "get":
+                html = self.http.get(nxt["url"])
+                page_url = nxt["url"]
+            else:
+                form = soup.find("form")
+                fields = {
+                    inp["name"]: inp.get("value", "")
+                    for inp in (form or soup).find_all("input", attrs={"type": "hidden"})
+                    if inp.get("name")
+                }
+                fields.update({"__EVENTTARGET": nxt["target"], "__EVENTARGUMENT": nxt["argument"]})
+                action = urljoin(page_url, form.get("action")) if form and form.get("action") else page_url
+                html = self.http.post(action, data=fields)
+            fp = _table_fingerprint(html)
+            if fp in seen_bodies:  # pager went nowhere new: stop rather than loop
+                log.warning("%s: page %d repeated an earlier page; stopping", ref.external_id, nxt["page"])
+                break
+            seen_bodies.add(fp)
+            pages.append(html)
+            current = nxt["page"]
         log.info("Fetched %d results page(s) for %s", len(pages), ref.external_id)
         return pages
 
@@ -414,6 +499,15 @@ class RaceTecScraper(BaseScraper):
                           f" (pinned '{hint}' not recognised)" if hint else "")
                 continue
             results, skipped = self._results(group_rows)
+            # When the race publishes positions, a row with a time but no position is a DNF
+            # (confirmed for Event Chip Timing): keep it, but as a non-finisher.
+            if any(r.overall_rank is not None for r in results):
+                unranked = [r for r in results if r.overall_rank is None]
+                for r in unranked:
+                    r.finisher = False
+                if unranked:
+                    log.info("   %d row(s) with a time but no position stored as non-finishers (DNF)",
+                             len(unranked))
             log.info("%s %s: %d results, %d rows skipped (DNF/DNS/unparseable)",
                      ref.external_id, label, len(results), skipped)
             if not results:
@@ -439,15 +533,22 @@ class RaceTecScraper(BaseScraper):
     @staticmethod
     def _results(rows: list[dict]) -> tuple[list[ResultIn], int]:
         out, skipped = [], 0
+        reasons: dict[str, int] = defaultdict(int)
+        example: dict[str, str] = {}
         for r in rows:
             try:
                 name = r.get("athlete_name") or f"{r.get('first_name', '')} {r.get('last_name', '')}"
                 name = clean_name(name)
-                chip = parse_time_to_seconds(r.get("chip_time"))
-                gun = parse_time_to_seconds(r.get("gun_time"))
+                chip = cell_time_seconds(r.get("chip_time"))
+                gun = cell_time_seconds(r.get("gun_time"))
                 seconds = chip or gun
                 if not name or not seconds:
                     skipped += 1
+                    reason = "no name" if not name else "no time"
+                    reasons[reason] += 1
+                    if reason not in example:  # shapes only, never values
+                        example[reason] = (f"name={cell_shape(name)}, chip={cell_shape(r.get('chip_time', ''))}, "
+                                           f"gun={cell_shape(r.get('gun_time', ''))}")
                     continue
                 raw = dict(r["_raw"])
                 raw["_time_source"] = "chip" if chip else "gun"
@@ -464,7 +565,11 @@ class RaceTecScraper(BaseScraper):
                 ))
             except Exception:  # fail soft per row
                 skipped += 1
-                log.debug("Unparseable row: %s", r, exc_info=True)
+                reasons["error"] += 1
+                log.debug("Unparseable row", exc_info=True)
+        for reason, n in reasons.items():
+            log.info("   skipped %d row(s): %s%s", n, reason,
+                     f" (first one's cell shapes: {example[reason]})" if reason in example else "")
         return out, skipped
 
 
@@ -517,6 +622,12 @@ def helper_cli(scraper_cls: type[RaceTecScraper]) -> None:
                         field = mapping.get(i, "-")
                         shapes = ", ".join(cell_shape(d[i]) if i < len(d) else "missing" for d in data)
                         print(f"   [{i:>2}] {h:<20} -> {field:<22} {shapes}")
+            pager = pager_links(soup, ref.url, ref.meta["rid"])
+            print(f"Pager     : {len(pager)} page link(s) found on page 1"
+                  + ("" if pager else " (if the site shows more pages, paste this page's pager HTML)"))
+            for p in pager[:5]:
+                print(f"   page {p['page']}: " + (p["url"] if p["kind"] == "get"
+                                                   else f"postback target={p['target']!r} arg={p['argument']!r}"))
             subs = sub_event_links(soup, ref.url, ref.meta["rid"])
             if subs:
                 print("Sub-events: (pin as 'RId:EId' in RACES to ingest one at a time)")

@@ -161,6 +161,7 @@ async def comparison_groups(conn: AsyncConnection, athlete_id: int) -> list[Comp
               JOIN result r ON r.id = cr.result_id
               JOIN event e ON e.id = r.event_id
              WHERE cr.athlete_id = :athlete_id
+               AND r.finisher  -- DNFs can be claimed but never enter the analysis
              GROUP BY e.discipline, e.distance_label
              ORDER BY count(*) DESC, max(e.event_date) DESC, e.discipline, e.distance_label
             """
@@ -185,6 +186,7 @@ async def claimed_group_rows(
              WHERE cr.athlete_id = :athlete_id
                AND e.discipline::text = :discipline
                AND e.distance_label = :distance_label
+               AND r.finisher
              ORDER BY e.event_date, r.id
             """
         ),

@@ -3,7 +3,7 @@
 - Results site: https://results.eventchiptiming.com (RaceTec-hosted results platform, https://www.racetec.net)
 - Company site: https://eventchiptiming.com (WordPress)
 - Feasibility check: 2026-11-09
-- **Status: scraper written but not run against the site; the project owner must run it by hand.**
+- **Status: working, run by the owner.** Grafman 2025 is ingested: the triathlon has 245 finishers + 6 DNFs, and the aquabike has 40.
   `src/chipt/ingest/providers/eventchiptiming.py` is a thin subclass of the shared RaceTec scraper
   (`racetec.py`, also used by [RunThrough](runthrough.md)). It was written without fetching any
   results pages and has only been tested offline on synthetic HTML. A person (not an AI agent) runs
@@ -81,12 +81,14 @@ Add the same race from other years for a time series.
 
 ## Results page layout (from the owner's `dump`, 2026-11-09)
 
-- Grafman (RId 10316, EId 1) fits on **one page**, so no pagination was needed.
+- Results are paginated at **50 rows per page**. Grafman (RId 10316, EId 1) has 245 finishers over 5
+  pages. The pager is not a `Page$N` postback; the shared pager detector handles it.
+- Rows with a time but **an empty position are DNFs** (confirmed by the owner) and are stored with
+  `finisher = false`. Grafman has 6, and the analysis excludes them.
 - Headers: `Pos, Name, Name, Gun Time, Gun Time, Cat Pos (Gen Pos), Category, Gender, Club, Team,
   Start, Swim, T1, Cycle, T2, Run`.
   - **There is no chip time.** Gun time is stored, and `raw._time_source = "gun"` records that.
-  - `Name` and `Gun Time` each appear twice. The first is used. What the second holds is still
-    unverified: `dump`'s `Columns` section shows each column's shape without its values.
+  - `Name` and `Gun Time` each appear twice. Each field takes the first non-empty copy per row.
   - `Cat Pos (Gen Pos)` holds both ranks, e.g. `3 (12)`, split into `category_rank` / `gender_rank`.
   - The splits (Swim, T1, Cycle, T2, Run) are out of MVP scope and kept only in `raw`.
 - Sub-event links: EId 1 = "Results" (the triathlon), EId 2 = "Middle Distance Aquabike".

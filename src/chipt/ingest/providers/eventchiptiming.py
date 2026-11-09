@@ -29,8 +29,8 @@ class EventChipTimingScraper(RaceTecScraper):
     # doesn't name it. `dump` lists a race's EIds. Add the same race from other years for a time series.
     RACES: list[str] = [
         # ATW Grafman Triathlon, 2025-06-01 (confirmed by the owner).
-        "10316:1=Middle Distance",  # middle distance triathlon; link text is just "Results"
-        "10316:2",                  # middle distance aquabike; distance comes from the link text
+        "10316:1=Middle Distance",           # middle distance triathlon; link text is just "Results"
+        "10316:2=Aquabike Middle Distance",  # its own page doesn't link to itself, so pin it
     ]
 
 
