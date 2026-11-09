@@ -19,7 +19,7 @@ Phase 1 is the Next.js UI, replacing Streamlit.
 - [x] V1 plan agreed: [docs/v1_plan.md](v1_plan.md)
 
 ## In progress
-- V1 phase 1, step 1: `feature/v1-web-scaffold` (Next.js + Tailwind + shadcn/ui shell, generated API client)
+- V1 phase 1, step 1 built on `feature/v1-web-scaffold`: Next.js shell, theme, generated API client, `npm run check` passing. Next: PR it, then step 2 (Find & Claim)
 
 ## Next up
 - V1 phase 1, steps 2–5: Find & Claim → My results + detail → Analysis + dashboard → Playwright smoke tests, then retire Streamlit

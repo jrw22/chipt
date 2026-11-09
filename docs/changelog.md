@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- V1 Next.js app scaffold in `web/` (Next.js 15, React 19, Tailwind v4, shadcn/ui on Radix with the Nova preset, Node 22). It has an app shell with responsive nav, a light/dark/system theme, an orange accent and an API-unreachable banner, plus placeholder pages for Dashboard, Find results, My results and Analysis.
+- Typed API client for the web app: `uv run chipt-openapi` exports FastAPI's OpenAPI schema, and `npm run gen:api` turns it into TypeScript types used through `openapi-fetch` and TanStack Query.
 - V1 implementation plan (`docs/v1_plan.md`): roadmap for V1 and a detailed plan for phase 1, the Next.js UI.
 - Project scaffold: `pyproject.toml` (uv), `docker-compose.yml` (Postgres 16 on host port 5433), `README.md` with setup steps and run commands.
 - Typed settings loaded from `.env` (`chipt.config`).
