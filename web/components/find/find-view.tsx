@@ -6,8 +6,9 @@ import { useMemo } from "react";
 
 import { SearchForm } from "@/components/find/search-form";
 import { SearchResults } from "@/components/find/search-results";
+import { EmptyState } from "@/components/empty-state";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Discipline } from "@/lib/api/client";
 import { type SearchParams, useFilters, useSearch } from "@/lib/api/hooks";
@@ -31,18 +32,6 @@ function urlFromParams(params: SearchParams): string {
   const sp = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) if (v) sp.set(k, v);
   return sp.toString();
-}
-
-function EmptyCard({ icon: Icon, title, children }: { icon: typeof Trophy; title: string; children: React.ReactNode }) {
-  return (
-    <Card className="border-dashed">
-      <CardContent className="flex flex-col items-center gap-2 py-12 text-center">
-        <Icon className="size-8 text-muted-foreground" aria-hidden />
-        <h2 className="font-medium">{title}</h2>
-        <div className="max-w-md text-sm text-muted-foreground">{children}</div>
-      </CardContent>
-    </Card>
-  );
 }
 
 function ResultsSkeleton() {
@@ -79,11 +68,11 @@ export function FindView() {
       />
 
       {!params ? (
-        <EmptyCard icon={Trophy} title="Find your race results">
+        <EmptyState icon={Trophy} title="Find your race results">
           Search your name to see results from{" "}
           {filters.data ? `${filters.data.providers.length} results providers` : "every results provider"} in one
           place, then tick the ones that are yours.
-        </EmptyCard>
+        </EmptyState>
       ) : search.isError ? (
         <Alert variant="destructive">
           <CircleAlert />
@@ -93,9 +82,9 @@ export function FindView() {
       ) : search.isPending ? (
         <ResultsSkeleton />
       ) : search.data.length === 0 ? (
-        <EmptyCard icon={SearchX} title={`No results for “${params.name}”`}>
+        <EmptyState icon={SearchX} title={`No results for “${params.name}”`}>
           Try a different spelling, just your surname, or fewer filters.
-        </EmptyCard>
+        </EmptyState>
       ) : (
         <div className={search.isPlaceholderData ? "opacity-60 transition-opacity" : undefined}>
           {/* key: a new search starts with no unsaved ticks. */}

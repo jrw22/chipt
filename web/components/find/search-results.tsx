@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { SearchResultOut } from "@/lib/api/client";
 import { useSaveClaims } from "@/lib/api/hooks";
-import { formatDate, formatDiscipline } from "@/lib/format";
+import { formatDate, formatDiscipline, ordinal } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 type EventGroup = {
@@ -33,12 +33,6 @@ function groupByEvent(results: SearchResultOut[]): EventGroup[] {
   return [...groups.values()].sort(
     (a, b) => b.bestScore - a.bestScore || b.sample.event_date.localeCompare(a.sample.event_date),
   );
-}
-
-function ordinal(n: number): string {
-  const s = ["th", "st", "nd", "rd"];
-  const v = n % 100;
-  return `${n}${s[(v - 20) % 10] || s[v] || s[0]}`;
 }
 
 function MatchBadge({ score }: { score: number }) {

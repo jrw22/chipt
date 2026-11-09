@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- V1 web app: **My results** page (`/results`). Sortable table on desktop and cards on mobile, discipline filter, pace and position. Remove with Undo. Empty state links to Find.
+- V1 web app: **result detail** page (`/results/[id]`). Time and pace, overall/gender/category positions as "N of M" with "Top X%" or "Winner", claim/remove, Compare link to analysis, and a not-found state.
+- API: `/results/{id}` returns `event_finishers`, `gender_finishers` and `category_finishers` (finishers only) for "N of M" positions.
 - V1 web app: **Find results** page (`/find`). Name search plus searchable filters, with the search kept in the URL. Results are grouped by race with match %, time, category, position and DNF badges. Tick/untick to claim or unclaim, then save from a sticky bar with toast feedback. Loading, empty and error states; mobile layout.
 - API: `time_source` (`chip` / `gun` / `unspecified`) on every result, so the UI can say when a time isn't a chip time.
 - V1 Next.js app scaffold in `web/` (Next.js 15, React 19, Tailwind v4, shadcn/ui on Radix with the Nova preset, Node 22). It has an app shell with responsive nav, a light/dark/system theme, an orange accent and an API-unreachable banner, plus placeholder pages for Dashboard, Find results, My results and Analysis.

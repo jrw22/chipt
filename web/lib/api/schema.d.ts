@@ -236,6 +236,11 @@ export interface components {
             age_group: string | null;
             /** Athlete Name */
             athlete_name: string;
+            /**
+             * Category Finishers
+             * @description Finishers in this event with the same age group; null if no age group
+             */
+            category_finishers?: number | null;
             /** Category Rank */
             category_rank: number | null;
             /**
@@ -260,6 +265,12 @@ export interface components {
              * Format: date
              */
             event_date: string;
+            /**
+             * Event Finishers
+             * @description Finishers in this event
+             * @default 0
+             */
+            event_finishers: number;
             /** Event Id */
             event_id: number;
             /** Event Name */
@@ -268,6 +279,11 @@ export interface components {
             finisher: boolean;
             /** Gender */
             gender: string | null;
+            /**
+             * Gender Finishers
+             * @description Finishers in this event with the same gender; null if no gender
+             */
+            gender_finishers?: number | null;
             /** Gender Rank */
             gender_rank: number | null;
             /** Id */

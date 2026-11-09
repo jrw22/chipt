@@ -283,6 +283,18 @@
             "title": "Athlete Name",
             "type": "string"
           },
+          "category_finishers": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Finishers in this event with the same age group; null if no age group",
+            "title": "Category Finishers"
+          },
           "category_rank": {
             "anyOf": [
               {
@@ -331,6 +343,12 @@
             "title": "Event Date",
             "type": "string"
           },
+          "event_finishers": {
+            "default": 0,
+            "description": "Finishers in this event",
+            "title": "Event Finishers",
+            "type": "integer"
+          },
           "event_id": {
             "title": "Event Id",
             "type": "integer"
@@ -353,6 +371,18 @@
               }
             ],
             "title": "Gender"
+          },
+          "gender_finishers": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Finishers in this event with the same gender; null if no gender",
+            "title": "Gender Finishers"
           },
           "gender_rank": {
             "anyOf": [

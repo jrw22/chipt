@@ -17,8 +17,10 @@ export const queryKeys = {
   health: ["health"] as const,
   filters: ["filters"] as const,
   search: (params: SearchParams) => ["search", params] as const,
+  myResults: ["me", "results"] as const,
+  result: (id: number) => ["result", id] as const,
   /** Everything that depends on which results are claimed. */
-  claimDependent: [["search"], ["me"], ["analysis"]] as const,
+  claimDependent: [["search"], ["me"], ["analysis"], ["result"]] as const,
 };
 
 /** Polls `/health` so the shell can show an "API unreachable" banner. */
@@ -48,6 +50,38 @@ export function useSearch(params: SearchParams | null) {
     enabled: !!params?.name,
     placeholderData: keepPreviousData,
     staleTime: 0, // claimed flags must always be fresh
+  });
+}
+
+/** The athlete's claimed results (newest first, from the API). */
+export function useMyResults() {
+  return useQuery({
+    queryKey: queryKeys.myResults,
+    queryFn: () => unwrap(api.GET("/me/results")),
+  });
+}
+
+/** One result with field sizes; `retry: false` so a 404 shows straight away. */
+export function useResult(id: number) {
+  return useQuery({
+    queryKey: queryKeys.result(id),
+    queryFn: () => unwrap(api.GET("/results/{result_id}", { params: { path: { result_id: id } } })),
+    enabled: Number.isInteger(id) && id > 0,
+    retry: false,
+  });
+}
+
+/** Claim or unclaim a single result (detail page, My results, undo). */
+export function useSetClaimed() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, claimed }: { id: number; claimed: boolean }) => {
+      if (claimed) await unwrap(api.POST("/me/results", { body: { result_id: id } }));
+      else await unwrap(api.DELETE("/me/results/{result_id}", { params: { path: { result_id: id } } }));
+      return { id, claimed };
+    },
+    onSettled: () =>
+      Promise.all(queryKeys.claimDependent.map((queryKey) => queryClient.invalidateQueries({ queryKey }))),
   });
 }
 
