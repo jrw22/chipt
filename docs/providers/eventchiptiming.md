@@ -75,7 +75,7 @@ sitemap at `/sitemap_index.xml`. Results are not hosted here.
 | Race spec | Race | Why |
 |---|---|---|
 | `10316:1=Middle Distance` | ATW Grafman Triathlon, 2025-06-01: middle distance triathlon | first race. The page doesn't name the distance, so it's pinned (confirmed by the owner) |
-| `10316:2` | ATW Grafman, 2025-06-01: middle distance aquabike | same day, different sport. Label `Aquabike Middle Distance (70.3)`, taken from the link text |
+| `10316:2=Aquabike Middle Distance` | ATW Grafman, 2025-06-01: middle distance aquabike | same day, different sport. Pinned, because its own page doesn't link to itself |
 | `8428:4=Middle Distance` | Grafman, 2026-06-07: middle distance triathlon | second year of the same race, which gives a time series |
 | `8428:3=Aquabike Middle Distance` | Grafman, 2026-06-07: middle distance aquabike | second year of the aquabike |
 
