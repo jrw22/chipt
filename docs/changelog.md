@@ -16,6 +16,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - RunThrough scraper (header-driven parser plus `list`/`dump` helpers), written without fetching the site and meant to be run by the project owner.
 - Event Chip Timing scraper (`eventchiptiming`, results.eventchiptiming.com, RaceTec client 16202), with race `10316:1` pinned. Like RunThrough, it was written without fetching any results pages and is user-run only because of an AI-agent opt-out in robots.txt.
 - Shared RaceTec base scraper (`chipt.ingest.providers.racetec`) used by RunThrough and Event Chip Timing. It supports `EId` sub-events (race specs `RId` or `RId:EId`), and its `dump` helper lists a race's sub-events.
+- RaceTec race specs can pin a distance (`"RId:EId=<distance>"`) for pages that don't name it. The parser splits combined `Cat Pos (Gen Pos)` columns into category and gender rank, and `dump` prints a value-free `Columns` shape summary that's safe to share.
+- Aquabike events get their own distance labels (e.g. `Aquabike Middle Distance (70.3)`), so they're never compared with triathlons.
 - resultsbase stub scraper, which ingests nothing because results pages are behind Cloudflare Turnstile.
 - Per-provider legal posture and technical notes in `docs/providers/`.
 - FastAPI backend: `/search` (pg_trgm fuzzy name match plus filters), `/results/{id}`, `/me/results` claim/unclaim, `/analysis` (PB, most recent vs PB, pace, linear trend; defaults to the largest comparison group), `/filters`, `/health`.

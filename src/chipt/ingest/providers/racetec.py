@@ -75,6 +75,8 @@ COLUMN_SYNONYMS: dict[str, list[str]] = {
     "category_rank": ["cat pos", "category pos", "category position", "cat position", "cat rank",
                       "age group pos", "cat place", "category place"],
     "distance": ["race", "distance", "event", "course", "race name"],
+    # One column holding both ranks, e.g. "3 (12)" = 3rd in category, 12th in gender.
+    "category_gender_rank": ["cat pos gen pos", "category pos gender pos", "cat pos gender pos"],
 }
 _HEADER_TO_FIELD = {syn: field for field, syns in COLUMN_SYNONYMS.items() for syn in syns}
 
@@ -85,6 +87,10 @@ _DISTANCE_MENTION = re.compile(
     r"\bhalf[\s-]*marathon\b|\bmarathon\b|\bultra\b|\b\d+(?:\.\d+)?\s*(?:k|km|mile|miles|mi)\b", re.I
 )
 _POSTBACK = re.compile(r"__doPostBack\('([^']+)','Page\$(\d+)'\)")
+_RANK_PAIR = re.compile(r"^\s*(\d+)\s*\(\s*(\d+)\s*\)\s*$")
+_TIME_SHAPE = re.compile(r"^\d{1,2}(?::\d{2}){1,2}(?:[.,]\d+)?$")
+# Sub-event link labels that say nothing about the distance.
+_GENERIC_SUB_EVENT = {"", "results", "result", "overall", "all", "all results"}
 
 
 # --------------------------------------------------------------------------- #
@@ -198,6 +204,32 @@ def extract_race_name(soup: BeautifulSoup, fallback: str | None, default: str = 
     return _text(title) if title and _text(title) else default
 
 
+def split_rank_pair(value: str | None) -> tuple[int | None, int | None]:
+    """'3 (12)' -> (3, 12); '3' -> (3, None); anything else -> (None, None)."""
+    m = _RANK_PAIR.match(value or "")
+    if m:
+        return int(m.group(1)), int(m.group(2))
+    return to_int(value) if value and value.strip().isdigit() else None, None
+
+
+def cell_shape(value: str) -> str:
+    """Describe a cell without revealing it, so `dump` output can be shared safely."""
+    v = value.strip()
+    if not v:
+        return "empty"
+    if _TIME_SHAPE.match(v):
+        return "time"
+    if v.isdigit():
+        return "int"
+    if _RANK_PAIR.match(v):
+        return "int (int)"
+    if v.upper() in {"DNF", "DNS", "DQ", "DSQ"}:
+        return v.upper()
+    if len(v) <= 4 and v.isalnum():
+        return f"code[{len(v)}]"  # e.g. category/gender codes
+    return f"text[{len(v.split())} word(s)]"
+
+
 def distance_mentions(text: str) -> set[str]:
     return {re.sub(r"\s+", "", m.lower()) for m in _DISTANCE_MENTION.findall(text or "")}
 
@@ -223,7 +255,8 @@ class RaceTecScraper(BaseScraper):
 
     BASE_URL: str
     CLIENT_ID: str
-    # Hand-picked races: "RId" for the whole race, or "RId:EId" for one sub-event.
+    # Hand-picked races: "RId" for the whole race, or "RId:EId" for one sub-event, optionally
+    # followed by "=<distance>" when the page doesn't say it, e.g. "10316:1=Middle Distance".
     # Prefer the SAME race across several years (time-series analysis), plus one different race.
     RACES: list[str] = []
     # Used only when RACES is empty: discover() scans the race listing for these names.
@@ -242,7 +275,20 @@ class RaceTecScraper(BaseScraper):
         rid = query_param(url, "RId")
         if not rid:
             raise ValueError(f"No RId in {url}")
-        return self._ref(rid, query_param(url, "EId"), url)
+        eid = query_param(url, "EId")
+        # Reuse a distance pinned for this race in RACES, so `dump`/`--url` match a normal ingest.
+        pinned = next((ref for ref in self._pinned_refs() if ref.external_id == race_key(rid, eid)), None)
+        return self._ref(rid, eid, url, **({"distance_hint": pinned.meta["distance_hint"]}
+                                           if pinned and pinned.meta.get("distance_hint") else {}))
+
+    def _pinned_refs(self) -> list[EventRef]:
+        refs = []
+        for spec in self.RACES:
+            race, _, distance = spec.partition("=")
+            rid, _, eid = race.partition(":")
+            meta = {"distance_hint": distance.strip()} if distance.strip() else {}
+            refs.append(self._ref(rid.strip(), eid.strip() or None, **meta))
+        return refs
 
     def list_races(self, pages: int = MAX_LISTING_PAGES) -> list[dict]:
         """Scan the paginated race listing. Returns [{rid, name, url, row_text}], de-duplicated."""
@@ -269,11 +315,7 @@ class RaceTecScraper(BaseScraper):
 
     def discover(self) -> list[EventRef]:
         if self.RACES:
-            refs = []
-            for spec in self.RACES:
-                rid, _, eid = spec.partition(":")
-                refs.append(self._ref(rid.strip(), eid.strip() or None))
-            return refs
+            return self._pinned_refs()
         if not self.RACE_NAME_PATTERNS:
             log.warning("[%s] RACES is empty and no RACE_NAME_PATTERNS set: nothing to ingest. "
                         "Use the `list` helper to find RIds and pin them in RACES.", self.provider.slug)
@@ -323,7 +365,15 @@ class RaceTecScraper(BaseScraper):
         if event_date is None:
             log.error("%s: could not find an event date on the page; skipping (see `dump`)", ref.external_id)
             return []
-        discipline = infer_discipline(race_name)
+        # The current sub-event's link label (e.g. "Middle Distance Aquabike") and any distance
+        # pinned in RACES ("=...") are extra hints for discipline and distance.
+        eid = ref.meta.get("eid")
+        sub_label = next((label for e, label, _ in sub_event_links(first, ref.url, ref.meta.get("rid", ""))
+                          if e == eid), "") if eid else ""
+        if sub_label.strip().lower() in _GENERIC_SUB_EVENT:
+            sub_label = ""
+        hint = ref.meta.get("distance_hint") or ""
+        discipline = infer_discipline(race_name, sub_label, hint)
 
         rows: list[dict] = []
         headers: list[str] = []
@@ -353,16 +403,23 @@ class RaceTecScraper(BaseScraper):
 
         events: list[ParsedEvent] = []
         for group_text, group_rows in groups.items():
-            label, km = normalise_distance(discipline, group_text, None if group_text == race_name else race_name)
+            if hint:  # owner-pinned distance wins (but still normalised to a canonical label)
+                label, km = normalise_distance(discipline, hint, sub_label, race_name)
+            else:
+                label, km = normalise_distance(
+                    discipline, group_text, sub_label, None if group_text == race_name else race_name)
             if label is None:
-                log.error("%s: unknown distance for '%s'; skipping group", ref.external_id, group_text)
+                log.error("%s: unknown distance for '%s'%s; skipping group. Pin it in RACES as "
+                          "'RId:EId=<distance>'", ref.external_id, group_text,
+                          f" (pinned '{hint}' not recognised)" if hint else "")
                 continue
             results, skipped = self._results(group_rows)
             log.info("%s %s: %d results, %d rows skipped (DNF/DNS/unparseable)",
                      ref.external_id, label, len(results), skipped)
             if not results:
                 continue
-            name = race_name if label.lower() in race_name.lower() else f"{race_name} — {label}"
+            label_words = label.lower().split(" (")[0]
+            name = race_name if label_words in race_name.lower() else f"{race_name} — {label}"
             events.append(ParsedEvent(
                 event=EventIn(
                     external_id=f"{ref.external_id}:{label}",
@@ -372,7 +429,7 @@ class RaceTecScraper(BaseScraper):
                     distance_km=km if discipline in SINGLE_DISCIPLINES else None,
                     event_date=event_date,
                     source_url=ref.url,
-                    raw={"race_name": race_name, "group": group_text,
+                    raw={"race_name": race_name, "group": group_text, "sub_event": sub_label or None,
                          "headers": headers, "pages": len(raw), **ref.meta},
                 ),
                 results=results,
@@ -394,14 +451,15 @@ class RaceTecScraper(BaseScraper):
                     continue
                 raw = dict(r["_raw"])
                 raw["_time_source"] = "chip" if chip else "gun"
+                cat_rank, gen_rank = split_rank_pair(r.get("category_gender_rank"))
                 out.append(ResultIn(
                     athlete_name=name,
                     chip_time_seconds=seconds,
                     gender=r.get("gender") or None,
                     age_group=r.get("age_group") or None,
                     overall_rank=to_int(r.get("overall_rank")),
-                    gender_rank=to_int(r.get("gender_rank")),
-                    category_rank=to_int(r.get("category_rank")),
+                    gender_rank=to_int(r.get("gender_rank")) if r.get("gender_rank") else gen_rank,
+                    category_rank=to_int(r.get("category_rank")) if r.get("category_rank") else cat_rank,
                     raw=raw,
                 ))
             except Exception:  # fail soft per row
@@ -439,7 +497,7 @@ def helper_cli(scraper_cls: type[RaceTecScraper]) -> None:
             ref = s.ref_from_url(args.url)
             pages = s.fetch(ref)
             soup = BeautifulSoup(pages[0], "html.parser")
-            _, headers, mapping = find_results_table(soup)
+            table, headers, mapping = find_results_table(soup)
             print(f"Race key  : {ref.external_id}  (RId={ref.meta['rid']}, EId={ref.meta['eid']})")
             print(f"Race name : {extract_race_name(soup, None)}")
             print(f"Event date: {extract_event_date(soup)}")
@@ -448,6 +506,17 @@ def helper_cli(scraper_cls: type[RaceTecScraper]) -> None:
             print("Mapping   : " + ", ".join(f"{headers[i]!r}->{f}" for i, f in sorted(mapping.items())))
             unmapped = [h for i, h in enumerate(headers) if i not in mapping]
             print(f"Unmapped  : {unmapped}  (kept in raw; add to COLUMN_SYNONYMS if needed)")
+            if table is not None:
+                data = [[_text(c) for c in tr.find_all("td")] for tr in table.find_all("tr")]
+                data = [d for d in data if len(d) >= len(mapping) and d][:3]
+                if data:
+                    print(f"Columns   : (shape of the first {len(data)} rows; no values, safe to share)")
+                    width = max(len(headers), *(len(d) for d in data))
+                    for i in range(width):
+                        h = headers[i] if i < len(headers) else "(no header)"
+                        field = mapping.get(i, "-")
+                        shapes = ", ".join(cell_shape(d[i]) if i < len(d) else "missing" for d in data)
+                        print(f"   [{i:>2}] {h:<20} -> {field:<22} {shapes}")
             subs = sub_event_links(soup, ref.url, ref.meta["rid"])
             if subs:
                 print("Sub-events: (pin as 'RId:EId' in RACES to ingest one at a time)")

@@ -74,9 +74,25 @@ sitemap at `/sitemap_index.xml`. Results are not hosted here.
 
 | Race spec | Race | Why |
 |---|---|---|
-| `10316:1` | unknown (from the owner's example URL) | first race; name and date to be confirmed by `dump` |
+| `10316:1=Middle Distance` | ATW Grafman Triathlon, 2025-06-01: middle distance triathlon | first race. The page doesn't name the distance, so it's pinned (confirmed by the owner) |
+| `10316:2` | ATW Grafman, 2025-06-01: middle distance aquabike | same day, different sport. Label `Aquabike Middle Distance (70.3)`, taken from the link text |
 
 Add the same race from other years for a time series.
+
+## Results page layout (from the owner's `dump`, 2026-11-09)
+
+- Grafman (RId 10316, EId 1) fits on **one page**, so no pagination was needed.
+- Headers: `Pos, Name, Name, Gun Time, Gun Time, Cat Pos (Gen Pos), Category, Gender, Club, Team,
+  Start, Swim, T1, Cycle, T2, Run`.
+  - **There is no chip time.** Gun time is stored, and `raw._time_source = "gun"` records that.
+  - `Name` and `Gun Time` each appear twice. The first is used. What the second holds is still
+    unverified: `dump`'s `Columns` section shows each column's shape without its values.
+  - `Cat Pos (Gen Pos)` holds both ranks, e.g. `3 (12)`, split into `category_rank` / `gender_rank`.
+  - The splits (Swim, T1, Cycle, T2, Run) are out of MVP scope and kept only in `raw`.
+- Sub-event links: EId 1 = "Results" (the triathlon), EId 2 = "Middle Distance Aquabike".
+- The race name has no distance in it, so it is pinned in `RACES` (`=Middle Distance`).
+- Aquabike is filed under `triathlon` but gets its own labels (`Aquabike Middle Distance (70.3)`),
+  so it is never compared with the triathlon.
 
 ## Owner workflow
 
@@ -93,5 +109,6 @@ That change applies to RunThrough too.
 
 ## How to add a race
 
-Add `"RId"` or `"RId:EId"` to `RACES` in `src/chipt/ingest/providers/eventchiptiming.py`, or run
+Add `"RId"` or `"RId:EId"` to `RACES`, plus `"=<distance>"` (e.g. `"=Middle Distance"`, `"=10k"`)
+when the race name doesn't state the distance. The pinned distance also applies to `dump` and `--url` in `src/chipt/ingest/providers/eventchiptiming.py`, or run
 `uv run chipt-ingest eventchiptiming --url <results url>`.

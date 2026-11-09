@@ -25,10 +25,13 @@ class EventChipTimingScraper(RaceTecScraper):
     BASE_URL = BASE_URL
     CLIENT_ID = "16202"  # Event Chip Timing's RaceTec client id (CId)
 
-    # Hand-picked races: "RId", or "RId:EId" for one sub-event. `dump` lists a race's EIds.
-    # 10316:1 comes from the owner's example URL (results.aspx?CId=16202&RId=10316&EId=1);
-    # race name/date unverified. Add the same race from other years for a time series.
-    RACES: list[str] = ["10316:1"]
+    # Hand-picked races: "RId", or "RId:EId" for one sub-event, plus "=<distance>" when the page
+    # doesn't name it. `dump` lists a race's EIds. Add the same race from other years for a time series.
+    RACES: list[str] = [
+        # ATW Grafman Triathlon, 2025-06-01 (confirmed by the owner).
+        "10316:1=Middle Distance",  # middle distance triathlon; link text is just "Results"
+        "10316:2",                  # middle distance aquabike; distance comes from the link text
+    ]
 
 
 if __name__ == "__main__":
