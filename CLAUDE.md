@@ -1,6 +1,6 @@
 # CLAUDE.md
 ## Project Goals
-**Current milestone:** MVP - A hub for amateur athletes that aggregates their race results — currently scattered across many different timing/results platforms — into one place, and lets them analyse their performance over time.
+**Current milestone:** V1 (MVP complete; see [V1 plan](docs/v1_plan.md)) - A hub for amateur athletes that aggregates their race results — currently scattered across many different timing/results platforms — into one place, and lets them analyse their performance over time.
 
 **Sports covered:** running, cycling, swimming, triathlon (and duathlon).
 
@@ -157,6 +157,7 @@ race sites → provider scraper (`discover` → `fetch` → `parse` → `upsert`
 - [Brainstorm](brainstorm.md) - Original goals and milestones notes
 - [Changelog](docs/changelog.md) - Version history
 - [Project status](docs/project_status.md) - Current progress
+- [V1 plan](docs/v1_plan.md) - V1 roadmap and the phase 1 (Next.js UI) implementation plan
 - [.env.example](.env.example) - All configuration variables
 - Update files in the docs folder after major milestones and major additions to the project.
 - Use the /update-docs-and-commit slash command when making commits
