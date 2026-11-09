@@ -90,6 +90,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Summary
+         * @description Dashboard data: totals, every comparison group's headline numbers, and recent results.
+         *
+         *     Empty (zero totals, no groups) rather than 404 when nothing is claimed, so the dashboard
+         *     can render its own empty state.
+         */
+        get: operations["summary_me_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/results/{result_id}": {
         parameters: {
             query?: never;
@@ -217,6 +240,33 @@ export interface components {
             providers: components["schemas"]["ProviderOut"][];
             /** Races */
             races: string[];
+        };
+        /**
+         * GroupSummary
+         * @description One comparison group's headline numbers, for the dashboard (AnalysisOut without the group list).
+         */
+        GroupSummary: {
+            /**
+             * Count
+             * @description Claimed finishes in this group
+             */
+            count: number;
+            discipline: components["schemas"]["Discipline"];
+            /** Distance Label */
+            distance_label: string;
+            most_recent: components["schemas"]["AnalysisPoint"] | null;
+            /** Most Recent Vs Pb Seconds */
+            most_recent_vs_pb_seconds?: number | null;
+            pb: components["schemas"]["AnalysisPoint"] | null;
+            /**
+             * Points
+             * @description Sorted by event_date ascending (for sparklines)
+             */
+            points: components["schemas"]["AnalysisPoint"][];
+            /** Trend */
+            trend: string;
+            /** Trend Seconds Per Year */
+            trend_seconds_per_year?: number | null;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -435,6 +485,44 @@ export interface components {
              */
             time_source: "chip" | "gun" | "unspecified";
         };
+        /**
+         * SummaryOut
+         * @description Everything the dashboard needs in one call.
+         */
+        SummaryOut: {
+            /**
+             * Groups
+             * @description Largest group first (same order as available_groups)
+             */
+            groups: components["schemas"]["GroupSummary"][];
+            /**
+             * Recent
+             * @description Latest claimed results, newest first
+             */
+            recent: components["schemas"]["ResultOut"][];
+            totals: components["schemas"]["SummaryTotals"];
+        };
+        /** SummaryTotals */
+        SummaryTotals: {
+            /** Disciplines */
+            disciplines: number;
+            /** First Race */
+            first_race?: string | null;
+            /** Latest Race */
+            latest_race?: string | null;
+            /** Providers */
+            providers: number;
+            /**
+             * Races
+             * @description Distinct events among claimed results
+             */
+            races: number;
+            /**
+             * Results
+             * @description Claimed results, including DNFs
+             */
+            results: number;
+        };
         /** ValidationError */
         ValidationError: {
             /** Context */
@@ -609,6 +697,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    summary_me_summary_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SummaryOut"];
                 };
             };
         };

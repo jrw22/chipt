@@ -96,8 +96,8 @@ web/                         # new Next.js app (monorepo, next to src/chipt)
 0. ✅ Save this plan as `docs/v1_plan.md`, linked from CLAUDE.md and `docs/project_status.md`.
 1. ✅ `feature/v1-web-scaffold` (PR #3): Next.js, Tailwind, shadcn, theme, nav shell, generated API client, `.nvmrc`, README run steps, a CI-able `npm run check` (typecheck + lint + build).
 2. ✅ `feature/v1-find-claim` (PR #4): Find & Claim, plus `time_source` on the API.
-3. ✅ `feature/v1-my-results`: My results and result detail, plus `event_finishers`.
-4. `feature/v1-analysis-dashboard`: Analysis, `/me/summary` and the Dashboard.
+3. ✅ `feature/v1-my-results` (PR #5): My results and result detail, plus `event_finishers`.
+4. ✅ `feature/v1-analysis-dashboard`: Analysis, `/me/summary` and the Dashboard.
 5. `feature/v1-retire-streamlit`: Playwright smoke tests (search → claim → analysis shows the point → unclaim). Delete `src/chipt/ui/` and the `streamlit`/`altair` dependencies. Update the docs.
 
 Each commit goes through `/update-docs-and-commit`. Docs to touch across the phase:

@@ -235,6 +235,88 @@
         "title": "FiltersOut",
         "type": "object"
       },
+      "GroupSummary": {
+        "description": "One comparison group's headline numbers, for the dashboard (AnalysisOut without the group list).",
+        "properties": {
+          "count": {
+            "description": "Claimed finishes in this group",
+            "title": "Count",
+            "type": "integer"
+          },
+          "discipline": {
+            "$ref": "#/components/schemas/Discipline"
+          },
+          "distance_label": {
+            "title": "Distance Label",
+            "type": "string"
+          },
+          "most_recent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AnalysisPoint"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "most_recent_vs_pb_seconds": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Most Recent Vs Pb Seconds"
+          },
+          "pb": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AnalysisPoint"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "points": {
+            "description": "Sorted by event_date ascending (for sparklines)",
+            "items": {
+              "$ref": "#/components/schemas/AnalysisPoint"
+            },
+            "title": "Points",
+            "type": "array"
+          },
+          "trend": {
+            "title": "Trend",
+            "type": "string"
+          },
+          "trend_seconds_per_year": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trend Seconds Per Year"
+          }
+        },
+        "required": [
+          "discipline",
+          "distance_label",
+          "count",
+          "points",
+          "pb",
+          "most_recent",
+          "trend"
+        ],
+        "title": "GroupSummary",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -829,6 +911,91 @@
         "title": "SearchResultOut",
         "type": "object"
       },
+      "SummaryOut": {
+        "description": "Everything the dashboard needs in one call.",
+        "properties": {
+          "groups": {
+            "description": "Largest group first (same order as available_groups)",
+            "items": {
+              "$ref": "#/components/schemas/GroupSummary"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "recent": {
+            "description": "Latest claimed results, newest first",
+            "items": {
+              "$ref": "#/components/schemas/ResultOut"
+            },
+            "title": "Recent",
+            "type": "array"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/SummaryTotals"
+          }
+        },
+        "required": [
+          "totals",
+          "groups",
+          "recent"
+        ],
+        "title": "SummaryOut",
+        "type": "object"
+      },
+      "SummaryTotals": {
+        "properties": {
+          "disciplines": {
+            "title": "Disciplines",
+            "type": "integer"
+          },
+          "first_race": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Race"
+          },
+          "latest_race": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Race"
+          },
+          "providers": {
+            "title": "Providers",
+            "type": "integer"
+          },
+          "races": {
+            "description": "Distinct events among claimed results",
+            "title": "Races",
+            "type": "integer"
+          },
+          "results": {
+            "description": "Claimed results, including DNFs",
+            "title": "Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "results",
+          "races",
+          "disciplines",
+          "providers"
+        ],
+        "title": "SummaryTotals",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -1067,6 +1234,25 @@
           }
         },
         "summary": "Unclaim"
+      }
+    },
+    "/me/summary": {
+      "get": {
+        "description": "Dashboard data: totals, every comparison group's headline numbers, and recent results.\n\nEmpty (zero totals, no groups) rather than 404 when nothing is claimed, so the dashboard\ncan render its own empty state.",
+        "operationId": "summary_me_summary_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SummaryOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Summary"
       }
     },
     "/results/{result_id}": {

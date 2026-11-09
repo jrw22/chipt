@@ -19,12 +19,13 @@ Phase 1 is the Next.js UI, replacing Streamlit.
 - [x] V1 plan agreed: [docs/v1_plan.md](v1_plan.md)
 - [x] V1 phase 1 step 1: Next.js scaffold (PR #3)
 - [x] V1 phase 1 step 2: Find & Claim page + `time_source` (PR #4)
+- [x] V1 phase 1 step 3: My results + result detail (PR #5)
 
 ## In progress
-- V1 phase 1, step 3 on `feature/v1-my-results`: My results and result detail pages, plus field sizes on `/results/{id}`
+- V1 phase 1, step 4 on `feature/v1-analysis-dashboard`: Analysis page, Dashboard and `/me/summary`
 
 ## Next up
-- V1 phase 1, steps 4–5: Analysis + dashboard → Playwright smoke tests, then retire Streamlit
+- V1 phase 1, step 5: Playwright smoke tests, then retire Streamlit (the new UI now covers every Streamlit page)
 - V1 phases 2–5: API feeds, more providers and races, advanced analysis, better search
 - RunThrough: the owner runs the scraper by hand (`list` → pin RIds → `dump` → ingest)
 

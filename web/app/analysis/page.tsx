@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
-import { ComingSoon } from "@/components/coming-soon";
+import { AnalysisView } from "@/components/analysis/analysis-view";
 import { PageHeader } from "@/components/page-header";
 
 export const metadata: Metadata = { title: "Analysis" };
@@ -10,9 +11,12 @@ export default function AnalysisPage() {
     <div className="space-y-6">
       <PageHeader
         title="Analysis"
-        description="How your times change within one comparison group (same discipline and distance)."
+        description="How your times change within one comparison group: same discipline, same distance."
       />
-      <ComingSoon step="step 4 (analysis + dashboard)" />
+      {/* AnalysisView reads the group from the URL, which needs a Suspense boundary. */}
+      <Suspense>
+        <AnalysisView />
+      </Suspense>
     </div>
   );
 }

@@ -18,6 +18,8 @@ export const queryKeys = {
   filters: ["filters"] as const,
   search: (params: SearchParams) => ["search", params] as const,
   myResults: ["me", "results"] as const,
+  summary: ["me", "summary"] as const,
+  analysis: (params: AnalysisParams) => ["analysis", params] as const,
   result: (id: number) => ["result", id] as const,
   /** Everything that depends on which results are claimed. */
   claimDependent: [["search"], ["me"], ["analysis"], ["result"]] as const,
@@ -50,6 +52,26 @@ export function useSearch(params: SearchParams | null) {
     enabled: !!params?.name,
     placeholderData: keepPreviousData,
     staleTime: 0, // claimed flags must always be fresh
+  });
+}
+
+export type AnalysisParams = { discipline?: Discipline; distance_label?: string };
+
+/** One comparison group's time series. No params = the API's default (largest group). */
+export function useAnalysis(params: AnalysisParams) {
+  return useQuery({
+    queryKey: queryKeys.analysis(params),
+    queryFn: () => unwrap(api.GET("/analysis", { params: { query: params } })),
+    placeholderData: keepPreviousData,
+    retry: false, // 404 = nothing claimed / unknown group: show it straight away
+  });
+}
+
+/** Dashboard data: totals, per-group headline numbers, recent results. */
+export function useSummary() {
+  return useQuery({
+    queryKey: queryKeys.summary,
+    queryFn: () => unwrap(api.GET("/me/summary")),
   });
 }
 
