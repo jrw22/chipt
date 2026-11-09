@@ -20,6 +20,8 @@ PROVIDERS: dict[str, str] = {
     "resultsbase": "chipt.ingest.providers.resultsbase:ResultsbaseScraper",
     # runthrough: must be run by a person, not an AI agent (see docs/providers/runthrough.md)
     "runthrough": "chipt.ingest.providers.runthrough:RunThroughScraper",
+    # eventchiptiming: must be run by a person, not an AI agent (see docs/providers/eventchiptiming.md)
+    "eventchiptiming": "chipt.ingest.providers.eventchiptiming:EventChipTimingScraper",
     "racebest": "chipt.ingest.providers.racebest:RacebestScraper",
     "ukresults": "chipt.ingest.providers.ukresults:UkresultsScraper",
 }

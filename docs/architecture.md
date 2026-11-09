@@ -92,5 +92,6 @@ client that parses responses into `chipt.schemas` models and turns failures into
 | `chipt.ingest.normalise` | Shared normalisation: time → seconds, distance label/km, discipline inference, name cleaning |
 | `chipt.ingest.cli` | Provider registry (`PROVIDERS`) and the `chipt-ingest` command |
 | `chipt.ingest.providers.*` | One isolated scraper per provider (see `docs/providers/`) |
+| `chipt.ingest.providers.racetec` | Shared base for RaceTec-hosted sites (RunThrough, Event Chip Timing): header-driven parser, GridView postback pagination, `list`/`dump` helper CLI |
 | `chipt.db.repository` | Read queries: search, claims, comparison groups, filters |
 | `chipt.analysis.timeseries` | Time-series metrics for a comparison group (pandas) |

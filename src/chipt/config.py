@@ -43,6 +43,7 @@ class Settings(BaseSettings):
 
     provider_resultsbase_base_url: str = "https://www.resultsbase.net"
     provider_runthrough_base_url: str = "https://results.runthrough.co.uk"
+    provider_eventchiptiming_base_url: str = "https://results.eventchiptiming.com"
     provider_racebest_base_url: str = "https://racebest.com"
     provider_ukresults_base_url: str = "https://www.ukresults.net"
 

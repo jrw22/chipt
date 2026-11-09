@@ -14,10 +14,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Idempotent ingest upserts, the `BaseScraper` interface, the `PoliteClient` HTTP client (robots.txt, rate limit, honest UA, retries, raw cache), shared normalisation helpers and the `chipt-ingest` CLI.
 - Provider scrapers. **RaceBest**: Holmfirth 10K 2023–26, Vale of York Half & 10K 2024–25, Harrogate Triathlon 2025–26. **UKResults**: Guy Fawkes 10 2024–26, Thirteen Arches Half 2025–26, Darley Moor Duathlon 2025–26. Together these ingest 19 events and 6,413 results, idempotently.
 - RunThrough scraper (header-driven parser plus `list`/`dump` helpers), written without fetching the site and meant to be run by the project owner.
+- Event Chip Timing scraper (`eventchiptiming`, results.eventchiptiming.com, RaceTec client 16202), with race `10316:1` pinned. Like RunThrough, it was written without fetching any results pages and is user-run only because of an AI-agent opt-out in robots.txt.
+- Shared RaceTec base scraper (`chipt.ingest.providers.racetec`) used by RunThrough and Event Chip Timing. It supports `EId` sub-events (race specs `RId` or `RId:EId`), and its `dump` helper lists a race's sub-events.
 - resultsbase stub scraper, which ingests nothing because results pages are behind Cloudflare Turnstile.
 - Per-provider legal posture and technical notes in `docs/providers/`.
 - FastAPI backend: `/search` (pg_trgm fuzzy name match plus filters), `/results/{id}`, `/me/results` claim/unclaim, `/analysis` (PB, most recent vs PB, pace, linear trend; defaults to the largest comparison group), `/filters`, `/health`.
 - Streamlit UI with three pages: Find & Claim, My Results and Analysis (time-series chart, PB/trend tiles, pace).
 
 ### Changed
-- `.env.example`: Postgres host port is now 5433, so it doesn't clash with a native Postgres on 5432. Added `PROVIDER_RACEBEST_BASE_URL` and `PROVIDER_UKRESULTS_BASE_URL`.
+- `.env.example`: Postgres host port is now 5433, so it doesn't clash with a native Postgres on 5432. Added `PROVIDER_RACEBEST_BASE_URL`, `PROVIDER_UKRESULTS_BASE_URL` and `PROVIDER_EVENTCHIPTIMING_BASE_URL`.
+- RunThrough scraper is now a thin subclass of the shared RaceTec base. Behaviour and external ids are unchanged.

@@ -21,7 +21,7 @@ uv run chipt-ingest --list            # configured providers
 uv run chipt-ingest racebest          # hand-picked races for a provider
 uv run chipt-ingest ukresults
 uv run chipt-ingest racebest --url <race-results-url>     # one specific race
-# runthrough: run by hand only (AI opt-out), see docs/providers/runthrough.md
+# runthrough, eventchiptiming: run by hand only (AI opt-out), see docs/providers/
 # resultsbase: stub, blocked by Cloudflare
 ```
 Re-running is idempotent. Raw responses are cached in `SCRAPER_CACHE_DIR`, so re-parsing doesn't re-fetch.
