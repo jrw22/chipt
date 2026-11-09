@@ -30,7 +30,17 @@ Per-provider legal posture and notes: [docs/providers/](docs/providers/).
 ## Run the app
 ```bash
 uv run uvicorn chipt.api.main:app --app-dir src --reload   # API on http://127.0.0.1:8000 (docs at /docs)
-uv run streamlit run src/chipt/ui/app.py            # UI on http://localhost:8501
+uv run streamlit run src/chipt/ui/app.py            # MVP UI on http://localhost:8501
+```
+
+### V1 web app (Next.js, in progress)
+Needs Node 22 (`nvm use` reads `web/.nvmrc`).
+```bash
+cd web
+npm install
+npm run dev        # http://localhost:3000 (the API must be running; override its URL with NEXT_PUBLIC_API_BASE_URL in web/.env.local)
+npm run check      # typecheck + lint + production build
+npm run gen:api    # regenerate TypeScript API types after changing src/chipt/schemas.py or the API
 ```
 
 ## Troubleshooting

@@ -1,7 +1,9 @@
 # Project status
 
 ## Current milestone
-**MVP** (see `project_spec.md` §3)
+**V1** (see `project_spec.md` §3 and the [V1 plan](v1_plan.md)). The MVP is complete; PRs #1 and #2 are merged.
+
+Phase 1 is the Next.js UI, replacing Streamlit.
 
 ## Done
 - [x] Project scaffold: uv project, Docker Postgres (port 5433), `.env` settings
@@ -12,14 +14,17 @@
 - [x] Streamlit UI (Find & Claim, My Results, Analysis), checked end to end against the real API
 - [x] Backend API: search, claims and analysis, tested end to end on real data
 - [x] **Ingest ≥2 races from ≥2 providers.** RaceBest (12 events, 3,876 results) and UKResults (7 events, 2,537 results). Re-running is idempotent.
+- [x] Event Chip Timing (RaceTec, user-run): ATW Grafman 2025 + 2026, triathlon and aquabike
+- [x] **MVP complete** (2026-11-09)
+- [x] V1 plan agreed: [docs/v1_plan.md](v1_plan.md)
 
 ## In progress
-- RunThrough: the owner runs the scraper by hand (`list` → pin RIds → `dump` → ingest)
-- Event Chip Timing: ATW Grafman 2025 ingested by the owner (triathlon has 245 finishers + 6 DNFs, aquabike has 40), and Grafman 2026 added (RId 8428: triathlon EId 4, aquabike EId 3). The owner re-runs the ingest to pick up the 2026 aquabike
+- V1 phase 1, step 1 built on `feature/v1-web-scaffold`: Next.js shell, theme, generated API client, `npm run check` passing. Next: PR it, then step 2 (Find & Claim)
 
 ## Next up
-- Manual test checklist pass by the owner, then PR `feature/mvp` → `main`
-- V1: Next.js UI, API-based provider feeds, more providers and races
+- V1 phase 1, steps 2–5: Find & Claim → My results + detail → Analysis + dashboard → Playwright smoke tests, then retire Streamlit
+- V1 phases 2–5: API feeds, more providers and races, advanced analysis, better search
+- RunThrough: the owner runs the scraper by hand (`list` → pin RIds → `dump` → ingest)
 
 ## Blockers / open questions
 - **resultsbase.net** is blocked by Cloudflare Turnstile. Next step: ask info@resultsbase.net for access or a feed.

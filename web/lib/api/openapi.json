@@ -1,0 +1,1175 @@
+{
+  "components": {
+    "schemas": {
+      "AnalysisOut": {
+        "properties": {
+          "available_groups": {
+            "items": {
+              "$ref": "#/components/schemas/ComparisonGroup"
+            },
+            "title": "Available Groups",
+            "type": "array"
+          },
+          "discipline": {
+            "$ref": "#/components/schemas/Discipline"
+          },
+          "distance_label": {
+            "title": "Distance Label",
+            "type": "string"
+          },
+          "most_recent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AnalysisPoint"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "most_recent_vs_pb_seconds": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "most_recent - pb; 0 means recent is PB",
+            "title": "Most Recent Vs Pb Seconds"
+          },
+          "pb": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AnalysisPoint"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "points": {
+            "description": "Sorted by event_date ascending",
+            "items": {
+              "$ref": "#/components/schemas/AnalysisPoint"
+            },
+            "title": "Points",
+            "type": "array"
+          },
+          "trend": {
+            "description": "improving | declining | flat | insufficient_data",
+            "title": "Trend",
+            "type": "string"
+          },
+          "trend_seconds_per_year": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Linear-fit slope; negative = getting faster",
+            "title": "Trend Seconds Per Year"
+          }
+        },
+        "required": [
+          "discipline",
+          "distance_label",
+          "points",
+          "pb",
+          "most_recent",
+          "trend"
+        ],
+        "title": "AnalysisOut",
+        "type": "object"
+      },
+      "AnalysisPoint": {
+        "properties": {
+          "chip_time": {
+            "title": "Chip Time",
+            "type": "string"
+          },
+          "chip_time_seconds": {
+            "title": "Chip Time Seconds",
+            "type": "integer"
+          },
+          "event_date": {
+            "format": "date",
+            "title": "Event Date",
+            "type": "string"
+          },
+          "event_name": {
+            "title": "Event Name",
+            "type": "string"
+          },
+          "is_pb": {
+            "default": false,
+            "title": "Is Pb",
+            "type": "boolean"
+          },
+          "pace": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "M:SS /km",
+            "title": "Pace"
+          },
+          "pace_seconds_per_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pace Seconds Per Km"
+          },
+          "result_id": {
+            "title": "Result Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "result_id",
+          "event_name",
+          "event_date",
+          "chip_time_seconds",
+          "chip_time"
+        ],
+        "title": "AnalysisPoint",
+        "type": "object"
+      },
+      "ClaimIn": {
+        "properties": {
+          "result_id": {
+            "title": "Result Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "result_id"
+        ],
+        "title": "ClaimIn",
+        "type": "object"
+      },
+      "ComparisonGroup": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "discipline": {
+            "$ref": "#/components/schemas/Discipline"
+          },
+          "distance_label": {
+            "title": "Distance Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "discipline",
+          "distance_label",
+          "count"
+        ],
+        "title": "ComparisonGroup",
+        "type": "object"
+      },
+      "Discipline": {
+        "enum": [
+          "running",
+          "cycling",
+          "swimming",
+          "triathlon",
+          "duathlon"
+        ],
+        "title": "Discipline",
+        "type": "string"
+      },
+      "FiltersOut": {
+        "description": "Values to populate search filter dropdowns.",
+        "properties": {
+          "age_groups": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Age Groups",
+            "type": "array"
+          },
+          "disciplines": {
+            "items": {
+              "$ref": "#/components/schemas/Discipline"
+            },
+            "title": "Disciplines",
+            "type": "array"
+          },
+          "providers": {
+            "items": {
+              "$ref": "#/components/schemas/ProviderOut"
+            },
+            "title": "Providers",
+            "type": "array"
+          },
+          "races": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Races",
+            "type": "array"
+          }
+        },
+        "required": [
+          "disciplines",
+          "providers",
+          "races",
+          "age_groups"
+        ],
+        "title": "FiltersOut",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "ProviderOut": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "name"
+        ],
+        "title": "ProviderOut",
+        "type": "object"
+      },
+      "ResultDetailOut": {
+        "properties": {
+          "age_group": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age Group"
+          },
+          "athlete_name": {
+            "title": "Athlete Name",
+            "type": "string"
+          },
+          "category_rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Rank"
+          },
+          "chip_time": {
+            "description": "HH:MM:SS",
+            "title": "Chip Time",
+            "type": "string"
+          },
+          "chip_time_seconds": {
+            "title": "Chip Time Seconds",
+            "type": "integer"
+          },
+          "claimed": {
+            "default": false,
+            "title": "Claimed",
+            "type": "boolean"
+          },
+          "discipline": {
+            "$ref": "#/components/schemas/Discipline"
+          },
+          "distance_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance Km"
+          },
+          "distance_label": {
+            "title": "Distance Label",
+            "type": "string"
+          },
+          "event_date": {
+            "format": "date",
+            "title": "Event Date",
+            "type": "string"
+          },
+          "event_id": {
+            "title": "Event Id",
+            "type": "integer"
+          },
+          "event_name": {
+            "title": "Event Name",
+            "type": "string"
+          },
+          "finisher": {
+            "title": "Finisher",
+            "type": "boolean"
+          },
+          "gender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender"
+          },
+          "gender_rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender Rank"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "overall_rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overall Rank"
+          },
+          "provider_name": {
+            "title": "Provider Name",
+            "type": "string"
+          },
+          "provider_slug": {
+            "title": "Provider Slug",
+            "type": "string"
+          },
+          "raw": {
+            "additionalProperties": true,
+            "title": "Raw",
+            "type": "object"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "athlete_name",
+          "gender",
+          "age_group",
+          "chip_time_seconds",
+          "chip_time",
+          "overall_rank",
+          "gender_rank",
+          "category_rank",
+          "finisher",
+          "event_id",
+          "event_name",
+          "event_date",
+          "discipline",
+          "distance_label",
+          "distance_km",
+          "location",
+          "source_url",
+          "provider_slug",
+          "provider_name"
+        ],
+        "title": "ResultDetailOut",
+        "type": "object"
+      },
+      "ResultOut": {
+        "properties": {
+          "age_group": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age Group"
+          },
+          "athlete_name": {
+            "title": "Athlete Name",
+            "type": "string"
+          },
+          "category_rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Rank"
+          },
+          "chip_time": {
+            "description": "HH:MM:SS",
+            "title": "Chip Time",
+            "type": "string"
+          },
+          "chip_time_seconds": {
+            "title": "Chip Time Seconds",
+            "type": "integer"
+          },
+          "claimed": {
+            "default": false,
+            "title": "Claimed",
+            "type": "boolean"
+          },
+          "discipline": {
+            "$ref": "#/components/schemas/Discipline"
+          },
+          "distance_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance Km"
+          },
+          "distance_label": {
+            "title": "Distance Label",
+            "type": "string"
+          },
+          "event_date": {
+            "format": "date",
+            "title": "Event Date",
+            "type": "string"
+          },
+          "event_id": {
+            "title": "Event Id",
+            "type": "integer"
+          },
+          "event_name": {
+            "title": "Event Name",
+            "type": "string"
+          },
+          "finisher": {
+            "title": "Finisher",
+            "type": "boolean"
+          },
+          "gender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender"
+          },
+          "gender_rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender Rank"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "overall_rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overall Rank"
+          },
+          "provider_name": {
+            "title": "Provider Name",
+            "type": "string"
+          },
+          "provider_slug": {
+            "title": "Provider Slug",
+            "type": "string"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "athlete_name",
+          "gender",
+          "age_group",
+          "chip_time_seconds",
+          "chip_time",
+          "overall_rank",
+          "gender_rank",
+          "category_rank",
+          "finisher",
+          "event_id",
+          "event_name",
+          "event_date",
+          "discipline",
+          "distance_label",
+          "distance_km",
+          "location",
+          "source_url",
+          "provider_slug",
+          "provider_name"
+        ],
+        "title": "ResultOut",
+        "type": "object"
+      },
+      "SearchResultOut": {
+        "properties": {
+          "age_group": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age Group"
+          },
+          "athlete_name": {
+            "title": "Athlete Name",
+            "type": "string"
+          },
+          "category_rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Rank"
+          },
+          "chip_time": {
+            "description": "HH:MM:SS",
+            "title": "Chip Time",
+            "type": "string"
+          },
+          "chip_time_seconds": {
+            "title": "Chip Time Seconds",
+            "type": "integer"
+          },
+          "claimed": {
+            "default": false,
+            "title": "Claimed",
+            "type": "boolean"
+          },
+          "discipline": {
+            "$ref": "#/components/schemas/Discipline"
+          },
+          "distance_km": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Distance Km"
+          },
+          "distance_label": {
+            "title": "Distance Label",
+            "type": "string"
+          },
+          "event_date": {
+            "format": "date",
+            "title": "Event Date",
+            "type": "string"
+          },
+          "event_id": {
+            "title": "Event Id",
+            "type": "integer"
+          },
+          "event_name": {
+            "title": "Event Name",
+            "type": "string"
+          },
+          "finisher": {
+            "title": "Finisher",
+            "type": "boolean"
+          },
+          "gender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender"
+          },
+          "gender_rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender Rank"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "overall_rank": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overall Rank"
+          },
+          "provider_name": {
+            "title": "Provider Name",
+            "type": "string"
+          },
+          "provider_slug": {
+            "title": "Provider Slug",
+            "type": "string"
+          },
+          "score": {
+            "description": "Match confidence 0-1 (pg_trgm similarity)",
+            "title": "Score",
+            "type": "number"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "athlete_name",
+          "gender",
+          "age_group",
+          "chip_time_seconds",
+          "chip_time",
+          "overall_rank",
+          "gender_rank",
+          "category_rank",
+          "finisher",
+          "event_id",
+          "event_name",
+          "event_date",
+          "discipline",
+          "distance_label",
+          "distance_km",
+          "location",
+          "source_url",
+          "provider_slug",
+          "provider_name",
+          "score"
+        ],
+        "title": "SearchResultOut",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Chipt API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/analysis": {
+      "get": {
+        "operationId": "analysis_analysis_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "discipline",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Discipline"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Discipline"
+            }
+          },
+          {
+            "in": "query",
+            "name": "distance_label",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Distance Label"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Analysis"
+      }
+    },
+    "/filters": {
+      "get": {
+        "operationId": "filters_filters_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FiltersOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Filters"
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Health Health Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health"
+      }
+    },
+    "/me/results": {
+      "get": {
+        "operationId": "my_results_me_results_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ResultOut"
+                  },
+                  "title": "Response My Results Me Results Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "My Results"
+      },
+      "post": {
+        "operationId": "claim_me_results_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClaimIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Claim"
+      }
+    },
+    "/me/results/{result_id}": {
+      "delete": {
+        "operationId": "unclaim_me_results__result_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "result_id",
+            "required": true,
+            "schema": {
+              "title": "Result Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Unclaim"
+      }
+    },
+    "/results/{result_id}": {
+      "get": {
+        "operationId": "result_detail_results__result_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "result_id",
+            "required": true,
+            "schema": {
+              "title": "Result Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultDetailOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Result Detail"
+      }
+    },
+    "/search": {
+      "get": {
+        "operationId": "search_search_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "minLength": 1,
+              "title": "Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "discipline",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Discipline"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Discipline"
+            }
+          },
+          {
+            "in": "query",
+            "name": "provider",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Provider"
+            }
+          },
+          {
+            "in": "query",
+            "name": "race",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Race"
+            }
+          },
+          {
+            "in": "query",
+            "name": "age_group",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Age Group"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 500,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SearchResultOut"
+                  },
+                  "title": "Response Search Search Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Search"
+      }
+    }
+  }
+}

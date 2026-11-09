@@ -12,6 +12,7 @@ Chipt is a Python monorepo (`src/chipt/`, managed with uv) with four parts:
 | Database | PostgreSQL 16 in Docker (`docker-compose.yml`, host port 5433), `pg_trgm`, JSONB | `uv run chipt-initdb` |
 | Backend API | FastAPI + async SQLAlchemy Core (asyncpg), pandas for analysis | `uv run uvicorn chipt.api.main:app --app-dir src` |
 | Frontend (MVP) | Streamlit + Altair; talks to the API over HTTP only | `uv run streamlit run src/chipt/ui/app.py` |
+| Frontend (V1) | Next.js 15 + Tailwind + shadcn/ui in `web/`; talks to the API over HTTP only | `cd web && npm run dev` (http://localhost:3000) |
 
 Configuration comes from `.env`, loaded by `chipt.config.Settings` (pydantic-settings). Every variable is documented in `.env.example`.
 
@@ -43,6 +44,14 @@ provider site ──▶ PoliteClient (robots.txt, rate limit, honest UA, retries
 ## Component Architecture
 
 ### Frontend Components
+
+**V1: Next.js (`web/`).** It's being built in steps (see `docs/v1_plan.md`); Streamlit is removed once it reaches parity.
+- `app/layout.tsx`: shell with a sticky top nav (Dashboard, Find results, My results, Analysis), a mobile sheet menu, a light/dark/system theme toggle, and an API-unreachable banner that polls `/health`.
+- `lib/api/schema.d.ts`: TypeScript types generated from FastAPI's OpenAPI schema (`npm run gen:api`, which runs `uv run chipt-openapi` and then `openapi-typescript`). `lib/api/client.ts`: an `openapi-fetch` client plus `unwrap()`, which turns failures into `ApiError`. `lib/api/hooks.ts`: TanStack Query hooks and query keys.
+- `lib/format.ts`: duration, signed delta, pace and date formatting (ported from the Streamlit helpers).
+- Pages are client components that fetch through TanStack Query. There are no Next server actions and no direct DB access.
+
+**MVP: Streamlit.**
 
 `chipt.ui.app` is a Streamlit multipage app (`st.navigation`). `chipt.ui.api_client` is an httpx
 client that parses responses into `chipt.schemas` models and turns failures into `ApiError`.

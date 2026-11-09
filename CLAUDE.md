@@ -1,6 +1,6 @@
 # CLAUDE.md
 ## Project Goals
-**Current milestone:** MVP - A hub for amateur athletes that aggregates their race results — currently scattered across many different timing/results platforms — into one place, and lets them analyse their performance over time.
+**Current milestone:** V1 (MVP complete; see [V1 plan](docs/v1_plan.md)) - A hub for amateur athletes that aggregates their race results — currently scattered across many different timing/results platforms — into one place, and lets them analyse their performance over time.
 
 **Sports covered:** running, cycling, swimming, triathlon (and duathlon).
 
@@ -23,22 +23,24 @@ chipt/
 ├── README.md            # setup + run commands
 ├── project_spec.md      # single source of truth for requirements & design
 ├── brainstorm.md        # original goals/milestones notes
-├── pyproject.toml       # uv project; scripts chipt-ingest, chipt-initdb
+├── pyproject.toml       # uv project; scripts chipt-ingest, chipt-initdb, chipt-openapi
 ├── docker-compose.yml   # Postgres 16 on host port 5433
 ├── .env.example         # all config vars; copy to .env
 ├── docs/
 │   ├── architecture.md  # components, data flow, API, schema
 │   ├── changelog.md
 │   ├── project_status.md
+│   ├── v1_plan.md       # V1 roadmap + phase 1 (Next.js UI) plan
 │   └── providers/       # per-provider legal posture + technical notes
+├── web/                 # V1 Next.js app (Node 22, npm): app/ routes, components/ (ui/ = shadcn), lib/api (generated types + client)
 └── src/chipt/
     ├── config.py        # settings from .env
     ├── schemas.py       # canonical Pydantic models + API contract
     ├── db/              # schema.sql, init, session, ingest_repo (upserts), repository (queries)
     ├── ingest/          # base.py, http.py (PoliteClient), normalise.py, cli.py, providers/<slug>.py (racetec.py = shared RaceTec base)
     ├── analysis/        # timeseries.py (pandas, pure)
-    ├── api/             # main.py (FastAPI)
-    └── ui/              # app.py + api_client.py (Streamlit)
+    ├── api/             # main.py (FastAPI), openapi.py (schema export for web/)
+    └── ui/              # app.py + api_client.py (Streamlit, MVP; removed once web/ reaches parity)
 ```
 
 Components (from `project_spec.md` §5.3):
@@ -71,11 +73,11 @@ race sites → provider scraper (`discover` → `fetch` → `parse` → `upsert`
 | API | FastAPI (Pydantic models double as the canonical schema) |
 | Database | PostgreSQL with `pg_trgm` and JSONB (chosen over MongoDB; see spec §5.2) |
 | Frontend (MVP) | Streamlit; the UI is throwaway |
-| Frontend (V1+) | Next.js + TypeScript, TailwindCSS, shadcn/ui, Recharts/Visx |
+| Frontend (V1+) | Next.js 15 (App Router) + React 19 + TypeScript, Tailwind v4, shadcn/ui (Radix, Nova preset), Recharts. Data fetching: TanStack Query; API types generated from FastAPI's OpenAPI (`openapi-typescript` + `openapi-fetch`); dark mode: `next-themes` |
 | Auth (V2) | FastAPI + JWT, or Clerk / Supabase Auth (decide at V2) |
 | LLM (Later) | Anthropic API (Claude) behind FastAPI |
 
-**Visual style:** Not yet defined. The MVP uses default Streamlit; V1 targets a "slick, user-centric UI" built with Tailwind + shadcn/ui.
+**Visual style (V1):** Clean and minimal. Neutral shadcn/ui base, Geist font, and **one sporty accent: orange** (`--primary`: orange-700 in light mode for white-text contrast, orange-500 in dark mode). The accent is for primary actions, focus rings and chart series 1 only. Light, dark and system themes. Mobile-first: top nav on desktop, slide-out sheet on mobile. Theme tokens live in `web/app/globals.css`.
 
 **Component patterns:**
 - Every provider scraper implements the common interface `discover()`, `fetch(event)`, `parse(raw)` and `upsert()`, and lives in its own isolated module
@@ -144,6 +146,8 @@ race sites → provider scraper (`discover` → `fetch` → `parse` → `upsert`
 
 **MVP approach:** Manual testing (no automated tests yet)
 
+**V1 frontend:** `cd web && npm run check` (typecheck + lint + production build) must pass before every PR. Playwright smoke tests arrive in V1 phase 1 step 5. After any API schema change, run `npm run gen:api` and commit the regenerated types.
+
 **Manual test checklist:**
 - [ ] Scraper successfully pulls race results
 - [ ] Re-running a scraper doesn't create duplicates (idempotent upsert)
@@ -157,6 +161,7 @@ race sites → provider scraper (`discover` → `fetch` → `parse` → `upsert`
 - [Brainstorm](brainstorm.md) - Original goals and milestones notes
 - [Changelog](docs/changelog.md) - Version history
 - [Project status](docs/project_status.md) - Current progress
+- [V1 plan](docs/v1_plan.md) - V1 roadmap and the phase 1 (Next.js UI) implementation plan
 - [.env.example](.env.example) - All configuration variables
 - Update files in the docs folder after major milestones and major additions to the project.
 - Use the /update-docs-and-commit slash command when making commits

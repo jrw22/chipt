@@ -236,6 +236,8 @@ For MVP the providers are (decided after the §8 feasibility spike):
 
 ### 5.9 Frontend
 
+> **✅ Decided (V1 frontend, 2026-11-09):** **Next.js 15 (App Router) + Tailwind v4 + shadcn/ui** in `web/`, with a clean and minimal look (neutral base, orange accent, light/dark). Pages are client components using TanStack Query against the FastAPI API. TypeScript types are generated from the API's OpenAPI schema, so Pydantic stays the source of truth. The scope of the first release is Streamlit parity plus a dashboard and a result detail page; Streamlit is then removed. See `docs/v1_plan.md`.
+
 > **✅ Decided (MVP frontend):** **Streamlit** for the MVP — fastest path to a working data→analysis→UI loop, letting us focus on the hard problems (scraping, matching, analysis). The UI is throwaway; the **Next.js** frontend is built for V1 once the data layer is proven.
 
 ---
@@ -259,6 +261,7 @@ For MVP the providers are (decided after the §8 feasibility spike):
 - **Analysis (MVP):** time series of headline results grouped by `(discipline, distance_label)`. §5.7
 - **Ingestion:** decoupled/scheduled; scrape for MVP → APIs for V1. §5.5
 - **MVP frontend:** Streamlit; Next.js for V1. §5.9
+- **V1 frontend:** Next.js 15 + Tailwind + shadcn/ui, TanStack Query, OpenAPI-generated types; Streamlit retired at parity. §5.9
 - **MVP identity:** single hardcoded profile. §4
 - **MVP deployment:** local-only (Docker Postgres + local FastAPI/Streamlit). §6
 - **MVP providers:** RaceBest and UKResults are ingested. RunThrough and Event Chip Timing are user-run only (AI opt-out in robots.txt). resultsbase is blocked by a Cloudflare challenge. Never bypass bot checks or AI opt-outs. §5.5, §8
