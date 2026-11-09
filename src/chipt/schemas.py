@@ -150,6 +150,37 @@ class AnalysisOut(BaseModel):
     available_groups: list[ComparisonGroup] = Field(default_factory=list)
 
 
+class GroupSummary(BaseModel):
+    """One comparison group's headline numbers, for the dashboard (AnalysisOut without the group list)."""
+
+    discipline: Discipline
+    distance_label: str
+    count: int = Field(description="Claimed finishes in this group")
+    points: list[AnalysisPoint] = Field(description="Sorted by event_date ascending (for sparklines)")
+    pb: AnalysisPoint | None
+    most_recent: AnalysisPoint | None
+    most_recent_vs_pb_seconds: int | None = None
+    trend: str
+    trend_seconds_per_year: float | None = None
+
+
+class SummaryTotals(BaseModel):
+    results: int = Field(description="Claimed results, including DNFs")
+    races: int = Field(description="Distinct events among claimed results")
+    disciplines: int
+    providers: int
+    first_race: date | None = None
+    latest_race: date | None = None
+
+
+class SummaryOut(BaseModel):
+    """Everything the dashboard needs in one call."""
+
+    totals: SummaryTotals
+    groups: list[GroupSummary] = Field(description="Largest group first (same order as available_groups)")
+    recent: list[ResultOut] = Field(description="Latest claimed results, newest first")
+
+
 class ProviderOut(BaseModel):
     slug: str
     name: str

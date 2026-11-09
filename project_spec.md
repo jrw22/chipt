@@ -233,6 +233,7 @@ For MVP the providers are (decided after the §8 feasibility spike):
 | POST | `/me/results` | claim a result (`result_id`) |
 | DELETE | `/me/results/{id}` | unclaim |
 | GET | `/analysis` | query param: discipline / comparison group → time-series data |
+| GET | `/me/summary` | dashboard: totals, each comparison group's PB / latest / trend, recent results (V1) |
 
 ### 5.9 Frontend
 

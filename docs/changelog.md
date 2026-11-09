@@ -7,6 +7,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- V1 web app: **Analysis** page (`/analysis`). Comparison-group picker kept in the URL, stat tiles (PB, latest vs PB, trend, races), finish-time and pace charts (crosshair tooltip, PB and latest labelled, clean time ticks), and a table of every race. Empty and unknown-group states.
+- V1 web app: **Dashboard** (`/`). Totals, a PB card with sparkline per comparison group, recent races, and a welcome empty state.
+- API: `GET /me/summary` returns totals, per-group headline numbers and recent results in one call for the dashboard.
 - V1 web app: **My results** page (`/results`). Sortable table on desktop and cards on mobile, discipline filter, pace and position. Remove with Undo. Empty state links to Find.
 - V1 web app: **result detail** page (`/results/[id]`). Time and pace, overall/gender/category positions as "N of M" with "Top X%" or "Winner", claim/remove, Compare link to analysis, and a not-found state.
 - API: `/results/{id}` returns `event_finishers`, `gender_finishers` and `category_finishers` (finishers only) for "N of M" positions.

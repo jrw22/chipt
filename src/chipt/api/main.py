@@ -16,9 +16,14 @@ from chipt.schemas import (
     Discipline,
     FiltersOut,
     ResultDetailOut,
+    GroupSummary,
     ResultOut,
     SearchResultOut,
+    SummaryOut,
+    SummaryTotals,
 )
+
+RECENT_RESULTS = 5
 
 settings = get_settings()
 
@@ -125,6 +130,36 @@ async def analysis(
 
     rows = await repo.claimed_group_rows(conn, athlete_id, chosen.discipline.value, chosen.distance_label)
     return analyse_group(rows, chosen.discipline, chosen.distance_label, available_groups=groups)
+
+
+@app.get("/me/summary", response_model=SummaryOut)
+async def summary(conn: AsyncConnection = Depends(get_conn)) -> SummaryOut:
+    """Dashboard data: totals, every comparison group's headline numbers, and recent results.
+
+    Empty (zero totals, no groups) rather than 404 when nothing is claimed, so the dashboard
+    can render its own empty state.
+    """
+    athlete_id = _athlete_id()
+    claimed = await repo.list_claimed(conn, athlete_id)  # newest first
+    groups = await repo.comparison_groups(conn, athlete_id)
+    summaries = []
+    for g in groups:
+        rows = await repo.claimed_group_rows(conn, athlete_id, g.discipline.value, g.distance_label)
+        a = analyse_group(rows, g.discipline, g.distance_label)
+        summaries.append(GroupSummary(count=g.count, **a.model_dump(exclude={"available_groups"})))
+    dates = [r.event_date for r in claimed]
+    return SummaryOut(
+        totals=SummaryTotals(
+            results=len(claimed),
+            races=len({r.event_id for r in claimed}),
+            disciplines=len({r.discipline for r in claimed}),
+            providers=len({r.provider_slug for r in claimed}),
+            first_race=min(dates, default=None),
+            latest_race=max(dates, default=None),
+        ),
+        groups=summaries,
+        recent=claimed[:RECENT_RESULTS],
+    )
 
 
 @app.get("/filters", response_model=FiltersOut)

@@ -77,7 +77,7 @@ race sites → provider scraper (`discover` → `fetch` → `parse` → `upsert`
 | Auth (V2) | FastAPI + JWT, or Clerk / Supabase Auth (decide at V2) |
 | LLM (Later) | Anthropic API (Claude) behind FastAPI |
 
-**Visual style (V1):** Clean and minimal. Neutral shadcn/ui base, Geist font, and **one sporty accent: orange** (`--primary`: orange-700 in light mode for white-text contrast, orange-500 in dark mode). The accent is for primary actions, focus rings and chart series 1 only. Light, dark and system themes. Mobile-first: top nav on desktop, slide-out sheet on mobile. Theme tokens live in `web/app/globals.css`.
+**Visual style (V1):** Clean and minimal. Neutral shadcn/ui base, Geist font, and **one sporty accent: orange** (`--primary`: orange-700 in light mode for white-text contrast, orange-500 in dark mode). The accent is for primary actions, focus rings and chart series 1 only (charts use orange-600 in dark mode, validated with the `dataviz` skill's palette validator). Charts follow the `dataviz` skill: load it before building or changing any chart. Light, dark and system themes. Mobile-first: top nav on desktop, slide-out sheet on mobile. Theme tokens live in `web/app/globals.css`.
 
 **Component patterns:**
 - Every provider scraper implements the common interface `discover()`, `fetch(event)`, `parse(raw)` and `upsert()`, and lives in its own isolated module
