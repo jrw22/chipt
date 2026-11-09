@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - RaceTec pagination follows any pager style (GET page links such as `PageNo=2`, or `__doPostBack` with any argument), stops if a page repeats, and `dump` prints the pager links it found. Grafman had 245 finishers across several pages and now ingests all of them, not just the first 50.
 - RaceTec: when a column header repeats (`Name`, `Gun Time`), each field uses the first non-empty copy. Time cells may carry extra text, and skip logs give the reason plus value-free cell shapes.
 - RaceTec: in a race that publishes positions, a row with a time but no position is stored as a DNF (`finisher = false`).
+- RaceTec `RACES` entries are validated. A malformed entry, two entries run together by a missing comma, or a race listed twice now raises a clear error and is no longer silently mislabelled.
 - Aquabike events get their own distance labels (e.g. `Aquabike Middle Distance (70.3)`), so they're never compared with triathlons.
 - resultsbase stub scraper, which ingests nothing because results pages are behind Cloudflare Turnstile.
 - Per-provider legal posture and technical notes in `docs/providers/`.

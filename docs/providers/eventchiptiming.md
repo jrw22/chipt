@@ -76,6 +76,8 @@ sitemap at `/sitemap_index.xml`. Results are not hosted here.
 |---|---|---|
 | `10316:1=Middle Distance` | ATW Grafman Triathlon, 2025-06-01: middle distance triathlon | first race. The page doesn't name the distance, so it's pinned (confirmed by the owner) |
 | `10316:2` | ATW Grafman, 2025-06-01: middle distance aquabike | same day, different sport. Label `Aquabike Middle Distance (70.3)`, taken from the link text |
+| `8428:4=Middle Distance` | Grafman, 2026-06-07: middle distance triathlon | second year of the same race, which gives a time series |
+| `8428:3=Aquabike Middle Distance` | Grafman, 2026-06-07: middle distance aquabike | second year of the aquabike |
 
 Add the same race from other years for a time series.
 
@@ -111,6 +113,6 @@ That change applies to RunThrough too.
 
 ## How to add a race
 
-Add `"RId"` or `"RId:EId"` to `RACES`, plus `"=<distance>"` (e.g. `"=Middle Distance"`, `"=10k"`)
+Add `"RId"` or `"RId:EId"` to `RACES` (one string per entry, each followed by a comma), plus `"=<distance>"` (e.g. `"=Middle Distance"`, `"=10k"`)
 when the race name doesn't state the distance. The pinned distance also applies to `dump` and `--url` in `src/chipt/ingest/providers/eventchiptiming.py`, or run
 `uv run chipt-ingest eventchiptiming --url <results url>`.

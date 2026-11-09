@@ -15,7 +15,7 @@
 
 ## In progress
 - RunThrough: the owner runs the scraper by hand (`list` → pin RIds → `dump` → ingest)
-- Event Chip Timing: ATW Grafman 2025 ingested by the owner (triathlon has 245 finishers + 6 DNFs, aquabike has 40). Next: the same race from other years for a time series
+- Event Chip Timing: ATW Grafman 2025 ingested by the owner (triathlon has 245 finishers + 6 DNFs, aquabike has 40), and Grafman 2026 added (RId 8428: triathlon EId 4, aquabike EId 3). The owner re-runs the ingest to pick up the 2026 aquabike
 
 ## Next up
 - Manual test checklist pass by the owner, then PR `feature/mvp` → `main`

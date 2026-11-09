@@ -31,6 +31,9 @@ class EventChipTimingScraper(RaceTecScraper):
         # ATW Grafman Triathlon, 2025-06-01 (confirmed by the owner).
         "10316:1=Middle Distance",           # middle distance triathlon; link text is just "Results"
         "10316:2=Aquabike Middle Distance",  # its own page doesn't link to itself, so pin it
+        # ATW Grafman Triathlon 2026-06-07
+        "8428:4=Middle Distance",
+        "8428:3=Aquabike Middle Distance",
     ]
 
 

@@ -88,6 +88,9 @@ _DISTANCE_MENTION = re.compile(
 )
 _POSTBACK = re.compile(r"__doPostBack\('([^']+)','Page\$(\d+)'\)")
 _POSTBACK_ANY = re.compile(r"__doPostBack\(\s*'([^']*)'\s*,\s*'([^']*)'\s*\)")
+# A RACES entry: "RId", "RId:EId", optionally "=<distance>" (no digits-colon inside the distance,
+# which is what two specs glued together by a missing comma look like).
+_RACE_SPEC = re.compile(r"^\s*(\d+)\s*(?::\s*(\d+))?\s*(?:=\s*([^=]*?))?\s*$")
 _PAGE_PARAM = re.compile(r"^(?:page|pageno|pagenum|pagenumber|pg|p|pn)$", re.I)
 _RANK_PAIR = re.compile(r"^\s*(\d+)\s*\(\s*(\d+)\s*\)\s*$")
 _TIME_SHAPE = re.compile(r"^\d{1,2}(?::\d{2}){1,2}(?:[.,]\d+)?$")
@@ -360,10 +363,18 @@ class RaceTecScraper(BaseScraper):
     def _pinned_refs(self) -> list[EventRef]:
         refs = []
         for spec in self.RACES:
-            race, _, distance = spec.partition("=")
-            rid, _, eid = race.partition(":")
-            meta = {"distance_hint": distance.strip()} if distance.strip() else {}
-            refs.append(self._ref(rid.strip(), eid.strip() or None, **meta))
+            m = _RACE_SPEC.match(spec)
+            if not m or (m.group(3) and re.search(r"\d+:\d+", m.group(3))):
+                raise ValueError(
+                    f"[{self.provider.slug}] bad RACES entry {spec!r}: expected 'RId', 'RId:EId' or "
+                    "'RId:EId=<distance>'. Two entries run together usually means a missing comma.")
+            rid, eid, distance = m.groups()
+            meta = {"distance_hint": distance.strip()} if distance and distance.strip() else {}
+            refs.append(self._ref(rid, eid, **meta))
+        keys = [r.external_id for r in refs]
+        dupes = sorted({k for k in keys if keys.count(k) > 1})
+        if dupes:
+            raise ValueError(f"[{self.provider.slug}] RACES lists the same race twice: {dupes}")
         return refs
 
     def list_races(self, pages: int = MAX_LISTING_PAGES) -> list[dict]:
