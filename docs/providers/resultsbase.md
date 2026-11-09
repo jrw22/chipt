@@ -5,6 +5,10 @@
 - Feasibility spike: 2026-11-08
 - **Status: BLOCKED. No data is ingested.** `src/chipt/ingest/providers/resultsbase.py` is a stub that logs why and returns no events.
 
+## Update (2026-11-09, V1 phase 2 review)
+
+robots.txt now also disallows `ClaudeBot` and `GPTBot` site-wide, so resultsbase data must stay out of LLM features. Its route is now **3, manual import** (owner-saved pages), alongside asking permission. See `platform_review.md`.
+
 ## Verdict
 
 Legally the site is permissive (robots.txt allows `/event/*/results`, and there are no terms of use that ban automated access). Technically it blocks us: every results page sits behind a **Cloudflare Turnstile "Verify you're human" challenge**. That is a deliberate anti-bot control. Getting past it (solving or automating the CAPTCHA, reusing browser cookies, spoofing a browser User-Agent) would break the spirit of our scraping policy. So we don't scrape this site.

@@ -5,7 +5,7 @@
 **Sports covered:** running, cycling, swimming, triathlon (and duathlon).
 
 **MVP scope:**
-- Ingest ≥2 races from each of ≥2 hand-picked providers by scraping. MVP providers: **RaceBest** (racebest.com) and **UKResults** (ukresults.net). RunThrough and Event Chip Timing are user-run only because of an AI opt-out, and resultsbase is blocked by Cloudflare (see `docs/providers/`)
+- Ingest ≥2 races from each of ≥2 hand-picked providers by scraping. MVP providers: **RaceBest** (racebest.com) and **UKResults** (ukresults.net). RunThrough and Event Chip Timing are user-run only because of an AI opt-out, and resultsbase is blocked by Cloudflare (see `docs/providers/`). V1 phase 2 assigns every platform an **access route**: see `docs/providers/platform_review.md`
 - Single user, no authentication: one hardcoded `athlete` row
 - Search results by name (required) plus optional discipline, provider, race name and age group, then **claim** the results that belong to the user
 - Analysis: a time series of the user's headline (chip) results within a comparison group of `(discipline, distance_label)`, e.g. running / 10K
@@ -104,6 +104,8 @@ race sites → provider scraper (`discover` → `fetch` → `parse` → `upsert`
 - Prefer providers that have APIs or permissive terms
 - **Never bypass bot checks, CAPTCHAs or AI-agent opt-outs in robots.txt** (no browser-spoofing User-Agents, no replaying session cookies). Reject the provider, or have the owner run the scraper when only AI agents are opted out
 - Data from providers that opt out of AI (currently RunThrough and Event Chip Timing) must not be sent to LLM features
+- For bot-checked or login-only sites (e.g. British Triathlon, resultsbase), the only route is **manual import**: the owner saves the page in their own browser and `chipt-import` parses the file. Never fetch those pages automatically
+- Re-check robots.txt and terms before building any scraper, and record the date and evidence in `docs/providers/<slug>.md`. Verdicts change (see `platform_review.md`)
 - Run app commands with `src` on the path if `.pth` imports break (see README → Troubleshooting)
 
 **Privacy:** Results are public, but take care when associating them with user accounts (V2+).
@@ -160,6 +162,7 @@ race sites → provider scraper (`discover` → `fetch` → `parse` → `upsert`
 - [Changelog](docs/changelog.md) - Version history
 - [Project status](docs/project_status.md) - Current progress
 - [V1 plan](docs/v1_plan.md) - V1 roadmap and the phase 1 (Next.js UI) implementation plan
+- [V1 phase 2 plan](docs/v1_phase2_plan.md) and [platform review](docs/providers/platform_review.md) - access routes for every results platform
 - [.env.example](.env.example) - All configuration variables
 - Update files in the docs folder after major milestones and major additions to the project.
 - Use the /update-docs-and-commit slash command when making commits

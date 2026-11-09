@@ -19,7 +19,7 @@ The owner wants to **start with the UI**. Decisions they've made:
 | Phase | Goal | Notes |
 |---|---|---|
 | **1. Next.js UI** | Replace Streamlit | This plan |
-| 2. API feeds | Prioritised list of results platforms with APIs; add an `api` ingest type; migrate the priority providers | Spec §5.5 already anticipates this |
+| 2. Platform review + more providers | In-depth UK results-platform review with access routes; manual-import path (British Triathlon); 2–3 more providers and races | **Redefined 2026-11-09**, see [`v1_phase2_plan.md`](v1_phase2_plan.md). API feeds deferred to a later phase |
 | 3. More data | More providers and races per provider; Grafman-style multi-year sets | Each new provider still goes through the robots.txt/ToS check |
 | 4. Advanced analysis | Position/percentile in field, age-group rank trends, all-groups overview; age-grading if age/DOB can be captured | Spec §5.4 open question on age buckets |
 | 5. Better search | Results grouped per event, name variants, club/age hints taken from already-claimed results | Builds on `pg_trgm` |
