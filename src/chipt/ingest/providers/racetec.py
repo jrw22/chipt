@@ -651,9 +651,17 @@ def helper_cli(scraper_cls: type[RaceTecScraper]) -> None:
     try:
         if args.cmd == "list":
             pat = re.compile(args.match, re.I) if args.match else None
-            for r in s.list_races(args.pages):
-                if not pat or pat.search(r["name"]):
-                    print(f"{r['rid']:>8}  {r['name']}  |  {r['row_text'][:80]}")
+            races = s.list_races(args.pages)
+            # Match the whole listing row, not just the link: some sites' link text is just "Results".
+            hits = [r for r in races if not pat or pat.search(r["name"]) or pat.search(r["row_text"])]
+            for r in hits:
+                print(f"{r['rid']:>8}  {r['name']}  |  {r['row_text'][:100]}")
+            print(f"\n{len(hits)} of {len(races)} race(s) matched, from up to {args.pages} listing page(s)"
+                  + ("" if hits or len(races) < args.pages * 20 else "; try a larger --pages"))
+            if pat and not hits and races:
+                print("Link-text shapes of the first races scanned (no values, safe to share):")
+                for r in races[:5]:
+                    print(f"   RId {r['rid']}: link={cell_shape(r['name'])}, row={cell_shape(r['row_text'])}")
         else:
             ref = s.ref_from_url(args.url)
             pages = s.fetch(ref)
