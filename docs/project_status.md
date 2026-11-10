@@ -27,7 +27,7 @@
 - V1 phase 2, step 1 on `feature/v1-platform-review`: UK results-platform review (`docs/providers/platform_review.md`) with access routes. **Waiting for the owner to approve the route-1 shortlist** (Eventrac, race-results.co.uk)
 
 ## Next up
-- **IRONMAN API spike** (next, owner-paced): the owner signs up at the IRONMAN API Portal and checks the API terms. Then the agent builds the first `api` provider on the user-run pattern (see `docs/providers/ironman.md`)
+- **Manual entry** on `feature/manual-entry` (stacked on `feature/more-races`): "Add a result" dialog + `POST /me/results/manual`. This is the route for IRONMAN, because the API portal lists no APIs (2026-11-10). Next: the owner enters their IRONMAN 70.3 Weymouth 2025 result
 - V1 phase 2, step 2 (built on `feature/manual-import`, stacked on PR #8): `chipt-import` + British Triathlon importer. **Belvoir 2026 Triathlon Sprint imported** (243 results, idempotent)
 - V1 phase 2, step 3 on `feature/provider-eventrac` (stacked on PR #9): **Eventrac** built and ingested (28 events, 6,312 results). race-results.co.uk is parked by the owner
 - V1 phase 2, step 4 on `feature/more-races`: route-1 providers expanded to 241 events (RaceBest 58, UKResults 70, Eventrac 113); 85,669 results in total
@@ -35,6 +35,7 @@
 - RunThrough: the owner runs the scraper by hand (`list` → pin RIds → `dump` → ingest)
 
 ## Blockers / open questions
+- **IRONMAN** has no usable API (the portal lists none), and its site is closed to scraping and imports. Results come in by manual entry. Asking IRONMAN for a feed is optional (outreach item 0).
 - **resultsbase.net** is blocked by Cloudflare Turnstile and now also opts out `ClaudeBot`/`GPTBot`. Route: manual import, or ask for access.
 - **British Triathlon** (the owner's priority for triathlon) is behind Cloudflare on every page. Route: manual import (phase 2 step 2); ask for a feed before V2.
 - **Outreach list** (British Triathlon, Stuweb + Castle Race Series, MYLAPS, RaceResult, UK Athletics): see `platform_review.md`. Not sent yet; the owner decides.

@@ -73,6 +73,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/results/manual": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add Manual
+         * @description Add a result the owner typed in (for platforms with no feed, e.g. IRONMAN) and claim it.
+         */
+        post: operations["add_manual_me_results_manual_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/me/results/{result_id}": {
         parameters: {
             query?: never;
@@ -273,6 +293,65 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /**
+         * ManualResultIn
+         * @description A result the owner types in themselves (for platforms that can't be scraped or imported,
+         *     e.g. IRONMAN). Nothing is fetched: the owner reads their own result and enters it.
+         */
+        ManualResultIn: {
+            /** Age Group */
+            age_group?: string | null;
+            /**
+             * Athlete Name
+             * @description Defaults to the athlete's display name
+             */
+            athlete_name?: string | null;
+            /** Category Rank */
+            category_rank?: number | null;
+            /**
+             * Chip Time
+             * @description Finish (chip) time, H:MM:SS or MM:SS
+             */
+            chip_time: string;
+            discipline: components["schemas"]["Discipline"];
+            /**
+             * Distance Km
+             * @description Single-discipline only; ignored for multi-sport
+             */
+            distance_km?: number | null;
+            /**
+             * Distance Label
+             * @description Comparability key, e.g. Middle Distance (70.3)
+             */
+            distance_label: string;
+            /**
+             * Event Date
+             * Format: date
+             */
+            event_date: string;
+            /** Event Name */
+            event_name: string;
+            /**
+             * Finisher
+             * @default true
+             */
+            finisher: boolean;
+            /** Gender */
+            gender?: string | null;
+            /** Gender Rank */
+            gender_rank?: number | null;
+            /** Location */
+            location?: string | null;
+            /** Overall Rank */
+            overall_rank?: number | null;
+            /**
+             * Source Platform
+             * @description Where the result is published, e.g. IRONMAN
+             */
+            source_platform?: string | null;
+            /** Source Url */
+            source_url?: string | null;
+        };
         /** ProviderOut */
         ProviderOut: {
             /** Name */
@@ -340,6 +419,12 @@ export interface components {
             id: number;
             /** Location */
             location: string | null;
+            /**
+             * Manual Entry
+             * @description Typed in by the owner (provider 'manual'), not scraped or imported
+             * @default false
+             */
+            manual_entry: boolean;
             /** Overall Rank */
             overall_rank: number | null;
             /** Provider Name */
@@ -350,6 +435,11 @@ export interface components {
             raw?: {
                 [key: string]: unknown;
             };
+            /**
+             * Source Platform
+             * @description Manual entries: where the result is published, e.g. IRONMAN
+             */
+            source_platform?: string | null;
             /** Source Url */
             source_url: string;
             /**
@@ -404,12 +494,23 @@ export interface components {
             id: number;
             /** Location */
             location: string | null;
+            /**
+             * Manual Entry
+             * @description Typed in by the owner (provider 'manual'), not scraped or imported
+             * @default false
+             */
+            manual_entry: boolean;
             /** Overall Rank */
             overall_rank: number | null;
             /** Provider Name */
             provider_name: string;
             /** Provider Slug */
             provider_slug: string;
+            /**
+             * Source Platform
+             * @description Manual entries: where the result is published, e.g. IRONMAN
+             */
+            source_platform?: string | null;
             /** Source Url */
             source_url: string;
             /**
@@ -464,6 +565,12 @@ export interface components {
             id: number;
             /** Location */
             location: string | null;
+            /**
+             * Manual Entry
+             * @description Typed in by the owner (provider 'manual'), not scraped or imported
+             * @default false
+             */
+            manual_entry: boolean;
             /** Overall Rank */
             overall_rank: number | null;
             /** Provider Name */
@@ -475,6 +582,11 @@ export interface components {
              * @description Match confidence 0-1 (pg_trgm similarity)
              */
             score: number;
+            /**
+             * Source Platform
+             * @description Manual entries: where the result is published, e.g. IRONMAN
+             */
+            source_platform?: string | null;
             /** Source Url */
             source_url: string;
             /**
@@ -649,6 +761,39 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["ClaimIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_manual_me_results_manual_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ManualResultIn"];
             };
         };
         responses: {

@@ -9,7 +9,7 @@ from datetime import date, datetime
 from enum import Enum
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class Discipline(str, Enum):
@@ -101,6 +101,8 @@ class ResultOut(BaseModel):
     source_url: str
     provider_slug: str
     provider_name: str
+    manual_entry: bool = Field(False, description="Typed in by the owner (provider 'manual'), not scraped or imported")
+    source_platform: str | None = Field(None, description="Manual entries: where the result is published, e.g. IRONMAN")
     claimed: bool = False
 
 
@@ -120,6 +122,53 @@ class ResultDetailOut(ResultOut):
 
 class ClaimIn(BaseModel):
     result_id: int
+
+
+class ManualResultIn(BaseModel):
+    """A result the owner types in themselves (for platforms that can't be scraped or imported,
+    e.g. IRONMAN). Nothing is fetched: the owner reads their own result and enters it."""
+
+    event_name: str = Field(min_length=1, max_length=200)
+    event_date: date
+    discipline: Discipline
+    distance_label: str = Field(min_length=1, max_length=60, description="Comparability key, e.g. Middle Distance (70.3)")
+    distance_km: float | None = Field(None, gt=0, le=1000, description="Single-discipline only; ignored for multi-sport")
+    chip_time: str = Field(description="Finish (chip) time, H:MM:SS or MM:SS")
+    location: str | None = Field(None, max_length=200)
+    source_platform: str | None = Field(None, max_length=100, description="Where the result is published, e.g. IRONMAN")
+    source_url: str | None = Field(None, max_length=2000)
+    athlete_name: str | None = Field(None, max_length=200, description="Defaults to the athlete's display name")
+    gender: str | None = Field(None, max_length=40)
+    age_group: str | None = Field(None, max_length=40)
+    overall_rank: int | None = Field(None, ge=1)
+    gender_rank: int | None = Field(None, ge=1)
+    category_rank: int | None = Field(None, ge=1)
+    finisher: bool = True
+
+    @field_validator("event_name", "distance_label", "location", "source_platform", "source_url",
+                     "athlete_name", "gender", "age_group", mode="before")
+    @classmethod
+    def _strip(cls, v: Any) -> Any:
+        if isinstance(v, str):
+            v = " ".join(v.split())
+            return v or None
+        return v
+
+    @field_validator("chip_time")
+    @classmethod
+    def _valid_time(cls, v: str) -> str:
+        from chipt.ingest.normalise import parse_time_to_seconds  # local: normalise imports this module
+
+        if parse_time_to_seconds(v) is None:
+            raise ValueError("expected a time like 5:12:34 or 45:10")
+        return v.strip()
+
+    @field_validator("source_url")
+    @classmethod
+    def _http_url(cls, v: str | None) -> str | None:
+        if v is not None and not v.lower().startswith(("http://", "https://")):
+            raise ValueError("expected an http(s) link")
+        return v
 
 
 class ComparisonGroup(BaseModel):

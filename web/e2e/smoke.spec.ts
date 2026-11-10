@@ -70,3 +70,50 @@ test("find → claim → analyse → unclaim (with undo)", async ({ page }) => {
     await expect(page.getByRole("heading", { name: "No results claimed yet" })).toBeVisible();
   });
 });
+
+test("add a result manually → my results → analyse → remove", async ({ page }) => {
+  // Synthetic data typed in by the test (never copied from a real provider). Teardown deletes it.
+  const race = "E2E Manual Triathlon";
+
+  await test.step("add a middle-distance triathlon from the empty state", async () => {
+    await page.goto("/results");
+    await expect(page.getByRole("heading", { name: "No results claimed yet" })).toBeVisible();
+    await page.getByRole("button", { name: "Add a result" }).click();
+    const dialog = page.getByRole("dialog", { name: "Add a result" });
+    await dialog.getByLabel("Race").fill(race);
+    await dialog.getByLabel("Date").fill("2025-09-14");
+    await dialog.getByRole("combobox", { name: "Distance" }).click();
+    await page.getByRole("option", { name: "Middle Distance (70.3)" }).click();
+    await dialog.getByLabel("Chip time").fill("5:31:07");
+    await dialog.getByLabel("Results published on").fill("Test platform");
+    await dialog.getByRole("button", { name: "More details" }).click();
+    await dialog.getByLabel("Age-group position").fill("40");
+    await dialog.getByRole("button", { name: "Add result" }).click();
+    await expect(dialog).toBeHidden();
+    await expect(page.getByText(`Added ${race}`)).toBeVisible();
+  });
+
+  await test.step("it's listed as a manual entry and the detail page has no field sizes", async () => {
+    const link = page.getByRole("link", { name: race }).first();
+    await expect(link).toBeVisible();
+    await expect(page.getByText("Manual entry · Test platform").first()).toBeVisible();
+    await link.click();
+    await expect(page.getByRole("heading", { level: 1, name: race })).toBeVisible();
+    await expect(page.getByText("5:31:07", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("40th")).toBeVisible();
+    await expect(page.getByText(/ of \d+/)).toHaveCount(0);
+    await expect(page.getByText("From Test platform")).toBeVisible();
+  });
+
+  await test.step("analysis groups it as triathlon / Middle Distance (70.3)", async () => {
+    await page.getByRole("link", { name: "Compare" }).click();
+    await expect(page.getByRole("combobox")).toContainText("Middle Distance (70.3)");
+    await expect(page.getByRole("row", { name: new RegExp(race) })).toContainText("PB");
+  });
+
+  await test.step("remove it", async () => {
+    await page.goto("/results");
+    await page.getByRole("button", { name: `Remove ${race} from your results` }).click();
+    await expect(page.getByRole("heading", { name: "No results claimed yet" })).toBeVisible();
+  });
+});

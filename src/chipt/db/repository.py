@@ -2,16 +2,26 @@
 
 from __future__ import annotations
 
+import hashlib
+from datetime import datetime, timezone
 from typing import Any
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
-from chipt.ingest.normalise import format_seconds
+from chipt.db.ingest_repo import upsert_parsed_event, upsert_provider
+from chipt.ingest.normalise import format_seconds, normalise_distance, parse_time_to_seconds
 from chipt.schemas import (
+    SINGLE_DISCIPLINES,
     ComparisonGroup,
     Discipline,
+    EventIn,
     FiltersOut,
+    IngestType,
+    ManualResultIn,
+    ParsedEvent,
+    ProviderIn,
+    ResultIn,
     ProviderOut,
     ResultDetailOut,
     ResultOut,
@@ -40,6 +50,7 @@ _RESULT_COLUMNS = f"""
     e.discipline::text AS discipline, e.distance_label,
     e.distance_km::float8 AS distance_km, e.location, e.source_url,
     p.slug AS provider_slug, p.name AS provider_name,
+    (p.slug = 'manual') AS manual_entry, r.raw->>'source_platform' AS source_platform,
     EXISTS (
         SELECT 1 FROM claimed_result c
          WHERE c.result_id = r.id AND c.athlete_id = :athlete_id
@@ -134,7 +145,13 @@ async def get_result(conn: AsyncConnection, result_id: int, athlete_id: int) -> 
             {"id": result_id, "athlete_id": athlete_id},
         )
     ).first()
-    return ResultDetailOut(**_row_to_dict(row)) if row else None
+    if row is None:
+        return None
+    detail = ResultDetailOut(**_row_to_dict(row))
+    if detail.manual_entry:
+        # A typed-in result is the only row in its event, so counted field sizes would read "1 of 1".
+        detail.event_finishers, detail.gender_finishers, detail.category_finishers = 0, None, None
+    return detail
 
 
 async def list_claimed(conn: AsyncConnection, athlete_id: int) -> list[ResultOut]:
@@ -174,6 +191,82 @@ async def unclaim_result(conn: AsyncConnection, athlete_id: int, result_id: int)
         text("DELETE FROM claimed_result WHERE athlete_id = :a AND result_id = :r"),
         {"a": athlete_id, "r": result_id},
     )
+
+
+# Typed-in results (no feed exists, e.g. IRONMAN) live under one provider of their own.
+MANUAL_PROVIDER = ProviderIn(slug="manual", name="Manual entry", base_url="", ingest_type=IngestType.manual)
+
+# Platforms whose robots.txt opts out of AI: results typed in from them are flagged so future LLM
+# features can exclude them (CLAUDE.md). Matched case-insensitively on `source_platform`.
+_AI_OPT_OUT_PLATFORMS = ("ironman", "runthrough", "event chip timing", "eventchiptiming")
+
+
+async def add_manual_result(conn: AsyncConnection, athlete_id: int, body: ManualResultIn) -> ResultOut:
+    """Store a result the owner typed in and claim it for them. Idempotent: entering the same
+    race, date, distance, name and time again returns the existing result."""
+    athlete_name = body.athlete_name or (
+        await conn.execute(text("SELECT display_name FROM athlete WHERE id = :id"), {"id": athlete_id})
+    ).scalar_one()
+    seconds = parse_time_to_seconds(body.chip_time)
+    assert seconds is not None  # checked by ManualResultIn
+
+    if body.discipline in SINGLE_DISCIPLINES:
+        km = body.distance_km or normalise_distance(body.discipline, body.distance_label)[1]
+    else:
+        km = None  # multi-sport events have no single distance (spec §5.4)
+
+    key = "|".join([body.event_name.lower(), body.event_date.isoformat(), body.discipline.value,
+                    body.distance_label.lower()])
+    platform = body.source_platform
+    raw = {
+        "entered_by": "owner",
+        "entered_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "source_platform": platform,
+        "_time_source": "chip",  # the form asks for chip time
+    }
+    if platform and platform.lower() in _AI_OPT_OUT_PLATFORMS:
+        raw["ai_opt_out"] = True
+
+    provider_id = await upsert_provider(conn, MANUAL_PROVIDER)
+    event_id, _ = await upsert_parsed_event(
+        conn,
+        provider_id,
+        ParsedEvent(
+            event=EventIn(
+                external_id=f"{athlete_id}:{hashlib.sha256(key.encode()).hexdigest()[:16]}",
+                name=body.event_name,
+                discipline=body.discipline,
+                distance_label=body.distance_label,
+                distance_km=km,
+                event_date=body.event_date,
+                location=body.location,
+                source_url=body.source_url or "",
+                raw={"entered_by": "owner", "source_platform": platform},
+            ),
+            results=[
+                ResultIn(
+                    athlete_name=athlete_name,
+                    chip_time_seconds=seconds,
+                    gender=body.gender,
+                    age_group=body.age_group,
+                    overall_rank=body.overall_rank,
+                    gender_rank=body.gender_rank,
+                    category_rank=body.category_rank,
+                    finisher=body.finisher,
+                    raw=raw,
+                )
+            ],
+        ),
+    )
+    result_id = (
+        await conn.execute(
+            text("SELECT id FROM result WHERE event_id = :e AND athlete_name = :n AND chip_time_seconds = :t"),
+            {"e": event_id, "n": athlete_name, "t": seconds},
+        )
+    ).scalar_one()
+    claimed = await claim_result(conn, athlete_id, result_id)
+    assert claimed is not None
+    return claimed
 
 
 async def comparison_groups(conn: AsyncConnection, athlete_id: int) -> list[ComparisonGroup]:

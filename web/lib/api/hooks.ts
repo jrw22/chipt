@@ -2,7 +2,7 @@
 
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { api, type Discipline, unwrap } from "./client";
+import { api, type Discipline, type ManualResultIn, unwrap } from "./client";
 
 export type SearchParams = {
   name: string;
@@ -132,5 +132,17 @@ export function useSaveClaims() {
     },
     onSettled: () =>
       Promise.all(queryKeys.claimDependent.map((queryKey) => queryClient.invalidateQueries({ queryKey }))),
+  });
+}
+
+/** Add a result the owner typed in (platforms with no feed, e.g. IRONMAN). The API claims it too. */
+export function useAddManualResult() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: ManualResultIn) => unwrap(api.POST("/me/results/manual", { body })),
+    onSuccess: () =>
+      Promise.all(
+        [...queryKeys.claimDependent, queryKeys.filters].map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+      ),
   });
 }

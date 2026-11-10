@@ -46,7 +46,7 @@ chipt/
 Components (from `project_spec.md` §5.3):
 - **Ingestion layer**: one scraper module per provider, run as offline CLI jobs
 - **PostgreSQL**: the canonical store
-- **FastAPI backend**: `/search`, `/results/{id}`, `/me/results` (GET/POST/DELETE), `/analysis`
+- **FastAPI backend**: `/search`, `/results/{id}`, `/me/results` (GET/POST/DELETE), `/me/results/manual` (typed-in results, e.g. IRONMAN), `/analysis`
 - **Frontend**: Next.js in `web/` (V1). The MVP's Streamlit UI was retired in V1 phase 1
 
 **Data flow:**

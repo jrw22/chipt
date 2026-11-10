@@ -5,7 +5,7 @@
 ## IRONMAN (added 2026-11-09)
 The owner asked about IRONMAN. It's **not scrapable**: `Claude-User` is disallowed, and the terms forbid scraping and database use (as reported). Its route is the **official IRONMAN API**. Order of work:
 1. Platform review + IRONMAN docs (step 1).
-2. **IRONMAN API spike** (`feature/provider-ironman-api`): the owner signs up and checks the API terms, then the agent builds the first `api` provider on the user-run pattern (`probe` prints the response shape only; the owner runs the ingest). See [`providers/ironman.md`](providers/ironman.md).
+2. ~~IRONMAN API spike~~: **dropped on 2026-11-10**, because the portal lists no APIs. It's replaced by **manual entry** (`feature/manual-entry`: "Add a result" + `POST /me/results/manual`). See [`providers/ironman.md`](providers/ironman.md).
 3. Steps 2–4 below, unchanged.
 
 ## Context
