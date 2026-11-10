@@ -50,19 +50,89 @@ BASE_URL = getattr(get_settings(), "provider_ukresults_base_url", "https://www.u
 # "Guy Fawkes Ten" don't carry a parseable distance). `sections` maps a
 # sectioned page's heading -> distance hint; unmapped sections are skipped.
 RACES: list[dict[str, Any]] = [
+    # Guy Fawkes 10 (Ripley / Pateley Bridge)
+    {"path": "2015/fawkes.html", "name": "Guy Fawkes 10", "distance": "10 mile"},
+    {"path": "2016/fawkes.html", "name": "Guy Fawkes 10", "distance": "10 mile"},
+    {"path": "2017/fawkes.html", "name": "Guy Fawkes 10", "distance": "10 mile"},
+    {"path": "2018/fawkes.html", "name": "Guy Fawkes 10", "distance": "10 mile"},
+    {"path": "2019/fawkes.html", "name": "Guy Fawkes 10", "distance": "10 mile"},
+    {"path": "2021/fawkes.html", "name": "Guy Fawkes 10", "distance": "10 mile"},
+    {"path": "2022/fawkes.html", "name": "Guy Fawkes 10", "distance": "10 mile"},
+    {"path": "2023/fawkes.html", "name": "Guy Fawkes 10", "distance": "10 mile"},
     {"path": "2024/fawkes.html", "name": "Guy Fawkes 10", "distance": "10 mile"},
     {"path": "2025/fawkes.html", "name": "Guy Fawkes 10", "distance": "10 mile"},
     {"path": "2026/fawkes.html", "name": "Guy Fawkes 10", "distance": "10 mile"},
+    # Thirteen Arches Half Marathon
+    {"path": "2016/13arches.html", "name": "Thirteen Arches Half Marathon", "distance": "Half Marathon"},
+    {"path": "2017/13arches.html", "name": "Thirteen Arches Half Marathon", "distance": "Half Marathon"},
+    {"path": "2018/13arches.html", "name": "Thirteen Arches Half Marathon", "distance": "Half Marathon"},
+    {"path": "2019/13arches.html", "name": "Thirteen Arches Half Marathon", "distance": "Half Marathon"},
+    {"path": "2023/13arches.html", "name": "Thirteen Arches Half Marathon", "distance": "Half Marathon"},
+    {"path": "2024/13arches.html", "name": "Thirteen Arches Half Marathon", "distance": "Half Marathon"},
     {"path": "2025/13arches.html", "name": "Thirteen Arches Half Marathon", "distance": "Half Marathon"},
     {"path": "2026/13arches.html", "name": "Thirteen Arches Half Marathon", "distance": "Half Marathon"},
-    # 2025 page is a single adult table; 2026 splits juniors and adults into sections.
+    # Dalby Dash 10K (Dalby Forest)
+    {"path": "2015/dalby.html", "name": "Dalby Dash 10K", "distance": "10K"},
+    {"path": "2016/dalby.html", "name": "Dalby Dash 10K", "distance": "10K"},
+    {"path": "2017/dalby.html", "name": "Dalby Dash 10K", "distance": "10K"},
+    {"path": "2018/dalby.html", "name": "Dalby Dash 10K", "distance": "10K"},
+    {"path": "2019/dalby.html", "name": "Dalby Dash 10K", "distance": "10K"},
+    {"path": "2021/dalby.html", "name": "Dalby Dash 10K", "distance": "10K"},
+    {"path": "2022/dalby.html", "name": "Dalby Dash 10K", "distance": "10K"},
+    {"path": "2023/dalby.html", "name": "Dalby Dash 10K", "distance": "10K"},
+    {"path": "2024/dalby.html", "name": "Dalby Dash 10K", "distance": "10K"},
+    {"path": "2025/dalby.html", "name": "Dalby Dash 10K", "distance": "10K"},
+    {"path": "2026/dalby.html", "name": "Dalby Dash 10K", "distance": "10K"},
+    # Richmond Castle 10K
+    {"path": "2015/richmond.html", "name": "Richmond Castle 10K", "distance": "10K"},
+    {"path": "2016/richmond.html", "name": "Richmond Castle 10K", "distance": "10K"},
+    {"path": "2017/richmond.html", "name": "Richmond Castle 10K", "distance": "10K"},
+    {"path": "2018/richmond.html", "name": "Richmond Castle 10K", "distance": "10K"},
+    {"path": "2019/richmond.html", "name": "Richmond Castle 10K", "distance": "10K"},
+    {"path": "2021/richmond.html", "name": "Richmond Castle 10K", "distance": "10K"},
+    {"path": "2022/richmond.html", "name": "Richmond Castle 10K", "distance": "10K"},
+    {"path": "2023/richmond.html", "name": "Richmond Castle 10K", "distance": "10K"},
+    {"path": "2024/richmond.html", "name": "Richmond Castle 10K", "distance": "10K"},
+    {"path": "2025/richmond.html", "name": "Richmond Castle 10K", "distance": "10K"},
+    {"path": "2026/richmond.html", "name": "Richmond Castle 10K", "distance": "10K"},
+    # Haweswater Half Marathon (not held / not listed in 2018 and 2021)
+    {"path": "2015/hawes.html", "name": "Haweswater Half Marathon", "distance": "Half Marathon"},
+    {"path": "2016/hawes.html", "name": "Haweswater Half Marathon", "distance": "Half Marathon"},
+    {"path": "2017/hawes.html", "name": "Haweswater Half Marathon", "distance": "Half Marathon"},
+    {"path": "2019/hawes.html", "name": "Haweswater Half Marathon", "distance": "Half Marathon"},
+    {"path": "2022/hawes.html", "name": "Haweswater Half Marathon", "distance": "Half Marathon"},
+    {"path": "2023/hawes.html", "name": "Haweswater Half Marathon", "distance": "Half Marathon"},
+    {"path": "2024/hawes.html", "name": "Haweswater Half Marathon", "distance": "Half Marathon"},
+    {"path": "2025/hawes.html", "name": "Haweswater Half Marathon", "distance": "Half Marathon"},
+    {"path": "2026/hawes.html", "name": "Haweswater Half Marathon", "distance": "Half Marathon"},
+    # Ian Hesketh Memorial Duathlon (Rivington): run 5K / bike 22K / run 5K, labelled Sprint (no 2023 listing)
+    {"path": "2015/hesketh.html", "name": "Ian Hesketh Memorial Duathlon", "distance": "Sprint"},
+    {"path": "2016/hesketh.html", "name": "Ian Hesketh Memorial Duathlon", "distance": "Sprint"},
+    {"path": "2017/hesketh.html", "name": "Ian Hesketh Memorial Duathlon", "distance": "Sprint"},
+    {"path": "2018/hesketh.html", "name": "Ian Hesketh Memorial Duathlon", "distance": "Sprint"},
+    {"path": "2019/hesketh.html", "name": "Ian Hesketh Memorial Duathlon", "distance": "Sprint"},
+    {"path": "2021/hesketh.html", "name": "Ian Hesketh Memorial Duathlon", "distance": "Sprint"},
+    {"path": "2022/hesketh.html", "name": "Ian Hesketh Memorial Duathlon", "distance": "Sprint"},
+    {"path": "2024/hesketh.html", "name": "Ian Hesketh Memorial Duathlon", "distance": "Sprint"},
+    {"path": "2025/hesketh.html", "name": "Ian Hesketh Memorial Duathlon", "distance": "Sprint"},
+    {"path": "2026/hesketh.html", "name": "Ian Hesketh Memorial Duathlon", "distance": "Sprint"},
+    # Darley Moor Sprint Duathlon, May. The 2026 page splits juniors and adults into sections.
+    {"path": "2022/darleydumay.html", "name": "Darley Moor Sprint Duathlon (May)", "distance": "Sprint"},
+    {"path": "2023/darleydumay.html", "name": "Darley Moor Sprint Duathlon (May)", "distance": "Sprint"},
+    {"path": "2024/darleydumay.html", "name": "Darley Moor Sprint Duathlon (May)", "distance": "Sprint"},
     {"path": "2025/darleydumay.html", "name": "Darley Moor Sprint Duathlon (May)", "distance": "Sprint"},
     {"path": "2026/darleydumay.html", "name": "Darley Moor Sprint Duathlon (May)", "sections": {"Adults": "Sprint"}},
+    # Darley Moor Sprint Duathlon, September
+    {"path": "2021/darleydusep.html", "name": "Darley Moor Sprint Duathlon (September)", "distance": "Sprint"},
+    {"path": "2022/darleydusep.html", "name": "Darley Moor Sprint Duathlon (September)", "distance": "Sprint"},
+    {"path": "2023/darleydusep.html", "name": "Darley Moor Sprint Duathlon (September)", "distance": "Sprint"},
+    {"path": "2024/darleydusep.html", "name": "Darley Moor Sprint Duathlon (September)", "distance": "Sprint"},
+    {"path": "2025/darleydusep.html", "name": "Darley Moor Sprint Duathlon (September)", "sections": {"Adults": "Sprint"}},  # juniors in their own sections
 ]
 
 _DATE_RE = re.compile(r"(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]+)\s+(\d{4})")
 _CHIP_COLS = ("chiptime", "chip time", "nettime", "net time")
-_TIME_COLS = ("time", "total", "finish time")
+_TIME_COLS = ("time", "total", "finish time", "overall")  # Hesketh Duathlon calls the finish time "Overall"
 _GUN_COLS = ("guntime", "gun time")
 
 
@@ -186,7 +256,8 @@ class UkresultsScraper(BaseScraper):
             for tr in table.find_all("tr"):
                 cells = _cells(tr)
                 lowered = [c.lower() for c in cells]
-                if "pos" in lowered and "name" in lowered:
+                # Older pages (≈2017-2019) split the name into Forename + Surname.
+                if "pos" in lowered and ("name" in lowered or {"forename", "surname"} <= set(lowered)):
                     if header and rows:
                         out.append((section, header, rows))
                     header, rows = cells, []
@@ -208,7 +279,8 @@ class UkresultsScraper(BaseScraper):
             return next((lowered.index(n) for n in names if n in lowered), None)
 
         i_pos, i_name, i_cat = idx("pos"), idx("name"), idx("cat")
-        i_catpos, i_m, i_f = idx("catpos"), idx("m"), idx("f")
+        i_catpos, i_m, i_f = idx("catpos", "pos/cat", "cat/pos"), idx("m"), idx("f")
+        i_first, i_last = idx("forename", "first name"), idx("surname", "last name")
         time_cols = [("ChipTime", idx(*_CHIP_COLS)), ("Time", idx(*_TIME_COLS)), ("GunTime", idx(*_GUN_COLS))]
 
         out: list[ResultIn] = []
@@ -220,7 +292,7 @@ class UkresultsScraper(BaseScraper):
 
                 raw_row: dict[str, Any] = {h or f"col{j}": (row[j] if j < len(row) else None)
                                            for j, h in enumerate(header)}
-                name = cell(i_name)
+                name = cell(i_name) or " ".join(p for p in (cell(i_first), cell(i_last)) if p) or None
                 if not name:
                     skipped += 1
                     continue
