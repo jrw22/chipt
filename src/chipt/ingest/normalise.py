@@ -59,8 +59,10 @@ _MULTI_DISTANCES: list[tuple[re.Pattern, str]] = [
 ]
 
 _DISCIPLINE_HINTS: list[tuple[re.Pattern, Discipline]] = [
-    (re.compile(r"\btri(athlon)?\b|aquabike", re.I), Discipline.triathlon),
-    (re.compile(r"\bduathlon\b", re.I), Discipline.duathlon),
+    # Aquabike (swim+bike) and aquathlon (swim+run) are multi-sport: filed under triathlon, with
+    # their own distance-label prefix so they're never compared with a triathlon.
+    (re.compile(r"\btri(athlon)?s?\b|aquabikes?|aquathlons?", re.I), Discipline.triathlon),
+    (re.compile(r"\bduathlons?\b", re.I), Discipline.duathlon),  # plural: "Junior & Sprint Duathlons"
     (re.compile(r"\bswim|open\s*water|aquathlon", re.I), Discipline.swimming),
     (re.compile(r"\bcycl|sportive|\bbike\b|time\s*trial|gran\s*fondo", re.I), Discipline.cycling),
 ]
@@ -86,7 +88,8 @@ def normalise_distance(
     if discipline not in SINGLE_DISCIPLINES:
         # Aquabike (swim + bike, no run) is filed under triathlon but must never be compared
         # with a triathlon of the same distance, so it gets its own labels.
-        prefix = "Aquabike " if re.search(r"aqua\s*bike", blob, re.I) else ""
+        prefix = ("Aquabike " if re.search(r"aqua\s*bike", blob, re.I)
+                  else "Aquathlon " if re.search(r"aquathlon", blob, re.I) else "")
         for pattern, label in _MULTI_DISTANCES[::-1] if "super" in blob.lower() else _MULTI_DISTANCES:
             if pattern.search(blob):
                 return prefix + label, None
