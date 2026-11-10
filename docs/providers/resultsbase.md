@@ -34,6 +34,7 @@ uv run chipt-ingest resultsbase      # again: the counts must match (idempotent)
   - The category is split into `age_group` (`M30-34`, as published) and `category_rank`, with the field size kept in `raw._category_size`.
   - Gender is taken from the category's M/F prefix, flagged `raw._gender_from_category`, and only used when there's no gender column.
   - Repeated header rows are dropped silently.
+- **Pinned:** TTP Cambridge Half Marathon 2022 (RId 337), 2023 (20184), 2024 (20401), 2025 (20708, ingested: 13,565 results, two identical runs) and 2026 (21012), all as EId 1. Tour of Cambridgeshire (20321) is cycling and isn't pinned.
 - To add years, pin them in `RACES` as `"<RId>:<EId>=Half Marathon"`.
 - **Config:** `PROVIDER_RESULTSBASE_RESULTS_URL` (default `https://results.resultsbase.net`). The old `PROVIDER_RESULTSBASE_BASE_URL` is no longer read, so you can delete it from `.env`.
 

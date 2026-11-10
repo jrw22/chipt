@@ -34,7 +34,13 @@ class ResultsbaseScraper(RaceTecScraper):
     # Hand-picked races: "RId", or "RId:EId" for one sub-event, plus "=<distance>" when the page
     # doesn't name it. `dump` lists a race's EIds. Add the same race from other years for a time series.
     RACES: list[str] = [
-        "20708:1=Half Marathon",  # Cambridge Half Marathon 2025 (URL from the owner)
+        # TTP Cambridge Half Marathon, Midsummer Common (RIds from the owner's `list`, 2026-11-10).
+        # EId 1 is the half in 2025; check each other year's sub-events with `dump` before ingesting.
+        "337:1=Half Marathon",    # 2022-03-06
+        "20184:1=Half Marathon",  # 2023-03-05
+        "20401:1=Half Marathon",  # 2024-03-03
+        "20708:1=Half Marathon",  # 2025-03-09 (URL from the owner; ingested, 13,565 results)
+        "21012:1=Half Marathon",  # 2026-03-08
     ]
 
 
