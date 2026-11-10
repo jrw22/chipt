@@ -27,6 +27,13 @@ uv run chipt-ingest resultsbase      # again: the counts must match (idempotent)
 ```
 - `dump` prints value-free column shapes, pager links and sub-events, which are safe to paste back. It fetches the whole race (all ~330 pages), so the ingest that follows reads from the cache. If a header is mapped wrongly, add its text to `COLUMN_SYNONYMS` in `racetec.py`.
 - **Pagination:** the RaceTec base follows the pager automatically (GET links or ASP.NET postbacks). It logs progress every 25 pages. `ResultsbaseScraper.MAX_RESULT_PAGES = 400` (the default is 200 = 10,000 rows). If the cap is hit, the run logs a "TRUNCATED" warning.
+- **Page layout (from the owner's `dump`, 2026-11-10):** columns are `Net Pos`, (blank), `Name` ×2, `Club`, `Team`, `Category`, `Chip Time`, `Pace` and `Net Gender Pos`, and every page repeats the header row. Names carry the bib (`Jane Smith #123`). The category cell also holds the category position (`M30-34 1 of 1,204`). There's no gender column. 275 pages → 13,565 timed results, plus ~185 rows without a time (skipped).
+- **How it's parsed (in the RaceTec base, so other RaceTec sites benefit too):**
+  - `Net Pos` and `Net Gender Pos` give the overall and gender rank.
+  - The bib is stripped from the name and kept in `raw`.
+  - The category is split into `age_group` (`M30-34`, as published) and `category_rank`, with the field size kept in `raw._category_size`.
+  - Gender is taken from the category's M/F prefix, flagged `raw._gender_from_category`, and only used when there's no gender column.
+  - Repeated header rows are dropped silently.
 - To add years, pin them in `RACES` as `"<RId>:<EId>=Half Marathon"`.
 - **Config:** `PROVIDER_RESULTSBASE_RESULTS_URL` (default `https://results.resultsbase.net`). The old `PROVIDER_RESULTSBASE_BASE_URL` is no longer read, so you can delete it from `.env`.
 
