@@ -1,8 +1,8 @@
 # Provider: IRONMAN (`ironman`)
 
 - Site: https://www.ironman.com (IRONMAN and IRONMAN 70.3, including UK races: Bolton, Wales, Swansea 70.3, …)
-- Checked: 2026-11-09 (honest `ChiptBot` UA; robots.txt only)
-- **Route: 5, official API.** Not scrapable by any automated route. **Status: API spike pending** (the owner signs up first).
+- Checked: 2026-11-09, re-checked 2026-11-10 (honest `ChiptBot` UA; robots.txt only)
+- **Route: manual entry of your own results.** The official API portal lists no APIs (2026-11-10), and the site can't be scraped or imported. The owner types in their own result through **My results → Add a result**. Asking IRONMAN for a feed is optional (route 5).
 
 ## Findings
 
@@ -24,17 +24,17 @@ The owner should confirm these against the current terms in the ironman.com foot
 
 **Third-party datasets** (Coach Cox, Academic Torrents, Kaggle) are scraped copies with unclear licences. Not used.
 
-## API spike (next, user-run pattern)
+## Official API: none available (2026-11-10)
+The owner signed up at the IRONMAN API Portal. **No APIs are listed** in the portal after sign-up, so the planned API spike is dropped.
 
-1. **Owner:**
-   - Signs up at the API portal and gets a key.
-   - **Reads the API terms** and checks two things: (a) personal, non-commercial use is allowed; (b) whether automated or AI-assisted access is restricted.
-   - If either is a no, stop. IRONMAN stays route 5, and this doc records why.
-2. **Owner shares** the endpoint shapes for one race (paths, parameters, auth header, pagination, field names; no result data).
-3. **Agent writes** `src/chipt/ingest/providers/ironman.py`, the first `IngestType.api` provider:
-   - the key in `.env` only (`PROVIDER_IRONMAN_API_KEY`), never committed or logged
-   - HTTP through `PoliteClient`
-   - a `probe` command that prints only the response **shape**, safe to paste back
-4. **Owner runs** `probe`, the agent adjusts the parser, then the owner runs `uv run chipt-ingest ironman` twice (the counts must match).
+## Other options checked (2026-11-10)
+- **robots.txt re-check:** unchanged. `Claude-User` is still disallowed site-wide (a Cloudflare-managed AI-agent block). The agent didn't fetch the results page (e.g. `/races/im703-weymouth/results`).
+- **Trace to source (route 4):** no help. Per public announcements, IRONMAN Europe races are timed by **MYLAPS** and its local partners (MYLAPS terms forbid copying, route 5), and North American races by **Sportstats**.
+- **Third-party copies:** ai-triathlon-result.teraren.com and endurance-data.com republish IRONMAN 70.3 Weymouth results (found via web search; not opened). These are scraped copies with no licence, and IRONMAN claims the rights. **Rejected.**
+- **Not pursued** (owner's choice): a UK GDPR subject access request for the owner's own data, and an outreach email.
 
-**IRONMAN data is AI-opted-out:** it's excluded from LLM features and never used as test fixtures.
+## Manual entry (built)
+- **UI:** My results → **Add a result**. Fields: race, date, discipline, distance (canonical labels such as **Middle Distance (70.3)** and **Full Distance (140.6)**, so entries join the same comparison groups as scraped triathlons) and chip time. Optional: results platform ("IRONMAN"), link, age group, gender, positions and location.
+- **API:** `POST /me/results/manual` (`repository.add_manual_result`). Each entry is its own event under the `manual` provider. Entering the same race again is idempotent. The detail view shows positions without "of N" field sizes.
+- **AI opt-out:** entries with `source_platform` "IRONMAN" are flagged `raw.ai_opt_out = true`. Typing in your own result fetches nothing from ironman.com, but these entries stay out of future LLM features to be safe.
+- Nothing from ironman.com is ever fetched, saved or parsed.

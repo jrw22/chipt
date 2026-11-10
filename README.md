@@ -38,6 +38,11 @@ uv run chipt-import britishtriathlon imports/BritishTriathlon/belvoir-2026-sprin
 ```
 How to save each provider's pages is in its `docs/providers/<slug>.md`. Re-importing is idempotent.
 
+## Add a result by hand (manual entry)
+For platforms Chipt can't read at all (e.g. IRONMAN: no API, scraping forbidden), use **My results →
+Add a result** in the web app, and copy your race, date, distance and chip time from the results page.
+The result is filed under "Manual entry" and claimed straight away. See [docs/providers/ironman.md](docs/providers/ironman.md).
+
 ## Run the app
 Two processes: the FastAPI backend and the Next.js web app (needs Node 22; `nvm use` reads `web/.nvmrc`).
 ```bash

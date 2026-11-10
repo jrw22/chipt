@@ -21,6 +21,7 @@ export type AnalysisPoint = Schemas["AnalysisPoint"];
 export type ComparisonGroup = Schemas["ComparisonGroup"];
 export type FiltersOut = Schemas["FiltersOut"];
 export type Discipline = Schemas["Discipline"];
+export type ManualResultIn = Schemas["ManualResultIn"];
 
 /** A failure worth showing the user: API unreachable, or a non-2xx response. */
 export class ApiError extends Error {
@@ -49,7 +50,14 @@ export async function unwrap<T>(call: Promise<FetchResult<T>>): Promise<T> {
   }
   if (!result.response.ok) {
     const detail = (result.error as { detail?: unknown } | undefined)?.detail;
-    const message = typeof detail === "string" ? detail : `Request failed (${result.response.status})`;
+    const message =
+      typeof detail === "string"
+        ? detail
+        : Array.isArray(detail) // FastAPI validation errors (422): one line per field
+          ? detail
+              .map((d: { loc?: unknown[]; msg?: string }) => `${String(d.loc?.at(-1) ?? "input")}: ${(d.msg ?? "invalid").replace(/^Value error, /, "")}`)
+              .join("; ")
+          : `Request failed (${result.response.status})`;
     throw new ApiError(message, result.response.status);
   }
   return result.data as T;

@@ -330,6 +330,175 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "ManualResultIn": {
+        "description": "A result the owner types in themselves (for platforms that can't be scraped or imported,\ne.g. IRONMAN). Nothing is fetched: the owner reads their own result and enters it.",
+        "properties": {
+          "age_group": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age Group"
+          },
+          "athlete_name": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Defaults to the athlete's display name",
+            "title": "Athlete Name"
+          },
+          "category_rank": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category Rank"
+          },
+          "chip_time": {
+            "description": "Finish (chip) time, H:MM:SS or MM:SS",
+            "title": "Chip Time",
+            "type": "string"
+          },
+          "discipline": {
+            "$ref": "#/components/schemas/Discipline"
+          },
+          "distance_km": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "maximum": 1000.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Single-discipline only; ignored for multi-sport",
+            "title": "Distance Km"
+          },
+          "distance_label": {
+            "description": "Comparability key, e.g. Middle Distance (70.3)",
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Distance Label",
+            "type": "string"
+          },
+          "event_date": {
+            "format": "date",
+            "title": "Event Date",
+            "type": "string"
+          },
+          "event_name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Event Name",
+            "type": "string"
+          },
+          "finisher": {
+            "default": true,
+            "title": "Finisher",
+            "type": "boolean"
+          },
+          "gender": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender"
+          },
+          "gender_rank": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender Rank"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "overall_rank": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overall Rank"
+          },
+          "source_platform": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Where the result is published, e.g. IRONMAN",
+            "title": "Source Platform"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          }
+        },
+        "required": [
+          "event_name",
+          "event_date",
+          "discipline",
+          "distance_label",
+          "chip_time"
+        ],
+        "title": "ManualResultIn",
+        "type": "object"
+      },
       "ProviderOut": {
         "properties": {
           "name": {
@@ -492,6 +661,12 @@
             ],
             "title": "Location"
           },
+          "manual_entry": {
+            "default": false,
+            "description": "Typed in by the owner (provider 'manual'), not scraped or imported",
+            "title": "Manual Entry",
+            "type": "boolean"
+          },
           "overall_rank": {
             "anyOf": [
               {
@@ -515,6 +690,18 @@
             "additionalProperties": true,
             "title": "Raw",
             "type": "object"
+          },
+          "source_platform": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Manual entries: where the result is published, e.g. IRONMAN",
+            "title": "Source Platform"
           },
           "source_url": {
             "title": "Source Url",
@@ -671,6 +858,12 @@
             ],
             "title": "Location"
           },
+          "manual_entry": {
+            "default": false,
+            "description": "Typed in by the owner (provider 'manual'), not scraped or imported",
+            "title": "Manual Entry",
+            "type": "boolean"
+          },
           "overall_rank": {
             "anyOf": [
               {
@@ -689,6 +882,18 @@
           "provider_slug": {
             "title": "Provider Slug",
             "type": "string"
+          },
+          "source_platform": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Manual entries: where the result is published, e.g. IRONMAN",
+            "title": "Source Platform"
           },
           "source_url": {
             "title": "Source Url",
@@ -845,6 +1050,12 @@
             ],
             "title": "Location"
           },
+          "manual_entry": {
+            "default": false,
+            "description": "Typed in by the owner (provider 'manual'), not scraped or imported",
+            "title": "Manual Entry",
+            "type": "boolean"
+          },
           "overall_rank": {
             "anyOf": [
               {
@@ -868,6 +1079,18 @@
             "description": "Match confidence 0-1 (pg_trgm similarity)",
             "title": "Score",
             "type": "number"
+          },
+          "source_platform": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Manual entries: where the result is published, e.g. IRONMAN",
+            "title": "Source Platform"
           },
           "source_url": {
             "title": "Source Url",
@@ -1202,6 +1425,45 @@
           }
         },
         "summary": "Claim"
+      }
+    },
+    "/me/results/manual": {
+      "post": {
+        "description": "Add a result the owner typed in (for platforms with no feed, e.g. IRONMAN) and claim it.",
+        "operationId": "add_manual_me_results_manual_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ManualResultIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Manual"
       }
     },
     "/me/results/{result_id}": {

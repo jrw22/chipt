@@ -17,6 +17,7 @@ from chipt.schemas import (
     FiltersOut,
     ResultDetailOut,
     GroupSummary,
+    ManualResultIn,
     ResultOut,
     SearchResultOut,
     SummaryOut,
@@ -95,6 +96,12 @@ async def claim(body: ClaimIn, conn: AsyncConnection = Depends(get_conn)) -> Res
     if result is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Result not found")
     return result
+
+
+@app.post("/me/results/manual", response_model=ResultOut, status_code=status.HTTP_201_CREATED)
+async def add_manual(body: ManualResultIn, conn: AsyncConnection = Depends(get_conn)) -> ResultOut:
+    """Add a result the owner typed in (for platforms with no feed, e.g. IRONMAN) and claim it."""
+    return await repo.add_manual_result(conn, _athlete_id(), body)
 
 
 @app.delete("/me/results/{result_id}", status_code=status.HTTP_204_NO_CONTENT)

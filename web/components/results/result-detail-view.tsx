@@ -182,19 +182,33 @@ export function ResultDetailView({ id }: { id: number }) {
             />
           </div>
           <p className="text-xs text-muted-foreground">
-            Field sizes count finishers in this event as published by {r.provider_name}.
+            {r.manual_entry
+              ? "Positions as you entered them."
+              : `Field sizes count finishers in this event as published by ${r.provider_name}.`}
           </p>
         </section>
       ) : null}
 
-      <a
-        href={r.source_url}
-        target="_blank"
-        rel="noreferrer"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        View on {r.provider_name} <ExternalLink className="size-3.5" />
-      </a>
+      {r.manual_entry ? (
+        <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <Badge variant="secondary">Manual entry</Badge>
+          {r.source_platform ? `From ${r.source_platform}` : "Typed in by you"}
+          {r.source_url ? (
+            <a href={r.source_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 hover:text-foreground">
+              · View results <ExternalLink className="size-3.5" />
+            </a>
+          ) : null}
+        </p>
+      ) : (
+        <a
+          href={r.source_url}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+        >
+          View on {r.provider_name} <ExternalLink className="size-3.5" />
+        </a>
+      )}
     </div>
   );
 }

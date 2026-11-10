@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
 import { EmptyState } from "@/components/empty-state";
+import { AddResultDialog } from "@/components/results/add-result-dialog";
 import { useUnclaimWithUndo } from "@/components/results/unclaim-with-undo";
 import { TimeDisplay } from "@/components/time-display";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -20,6 +21,11 @@ import type { ResultOut } from "@/lib/api/client";
 import { useMyResults } from "@/lib/api/hooks";
 import { formatDate, formatDiscipline, formatPace, ordinal, paceOf } from "@/lib/format";
 import { cn } from "@/lib/utils";
+
+/** "RaceBest", or for typed-in results "Manual entry · IRONMAN". */
+function sourceLabel(r: ResultOut): string {
+  return r.manual_entry && r.source_platform ? `${r.provider_name} · ${r.source_platform}` : r.provider_name;
+}
 
 type SortKey = "date" | "race" | "time";
 type SortDir = "asc" | "desc";
@@ -148,15 +154,18 @@ export function MyResultsView() {
         icon={ListPlus}
         title="No results claimed yet"
         action={
-          <Button asChild>
-            <Link href="/find">
-              <Search /> Find your results
-            </Link>
-          </Button>
+          <div className="flex flex-wrap justify-center gap-2">
+            <Button asChild>
+              <Link href="/find">
+                <Search /> Find your results
+              </Link>
+            </Button>
+            <AddResultDialog />
+          </div>
         }
       >
         Search your name across every results provider and tick the results that are yours. They&apos;ll all
-        appear here.
+        appear here. Raced somewhere Chipt can&apos;t read, like IRONMAN? Add the result yourself.
       </EmptyState>
     );
   }
@@ -169,26 +178,29 @@ export function MyResultsView() {
           {discipline ? ` ${formatDiscipline(discipline).toLowerCase()}` : ""} result{rows.length === 1 ? "" : "s"}
           {discipline ? ` of ${all.length}` : ""}
         </p>
-        {disciplines.length > 1 || discipline ? (
-          <ToggleGroup
-            type="single"
-            variant="outline"
-            size="sm"
-            value={discipline || "all"}
-            onValueChange={(v) => setParams({ discipline: v && v !== "all" ? v : null })}
-            aria-label="Filter by discipline"
-          >
-            <ToggleGroupItem value="all">All</ToggleGroupItem>
-            {(discipline && !disciplines.includes(discipline as ResultOut["discipline"])
-              ? [...disciplines, discipline as ResultOut["discipline"]]
-              : disciplines
-            ).map((d) => (
-              <ToggleGroupItem key={d} value={d}>
-                {formatDiscipline(d)}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
-        ) : null}
+        <div className="flex flex-wrap items-center gap-3">
+          {disciplines.length > 1 || discipline ? (
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              size="sm"
+              value={discipline || "all"}
+              onValueChange={(v) => setParams({ discipline: v && v !== "all" ? v : null })}
+              aria-label="Filter by discipline"
+            >
+              <ToggleGroupItem value="all">All</ToggleGroupItem>
+              {(discipline && !disciplines.includes(discipline as ResultOut["discipline"])
+                ? [...disciplines, discipline as ResultOut["discipline"]]
+                : disciplines
+              ).map((d) => (
+                <ToggleGroupItem key={d} value={d}>
+                  {formatDiscipline(d)}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          ) : null}
+          <AddResultDialog />
+        </div>
       </div>
 
       {rows.length === 0 ? (
@@ -227,7 +239,7 @@ export function MyResultsView() {
                   <Link href={`/results/${r.id}`} className="block truncate font-medium hover:underline">
                     {r.event_name}
                   </Link>
-                  <span className="text-xs text-muted-foreground">{r.provider_name}</span>
+                  <span className="text-xs text-muted-foreground">{sourceLabel(r)}</span>
                 </TableCell>
                 <TableCell className="whitespace-nowrap">
                   {formatDiscipline(r.discipline)} · {r.distance_label}
@@ -264,6 +276,7 @@ export function MyResultsView() {
                   <p className="text-xs text-muted-foreground">
                     {formatDate(r.event_date)} · {formatDiscipline(r.discipline)} · {r.distance_label}
                   </p>
+                  {r.manual_entry ? <p className="text-xs text-muted-foreground">{sourceLabel(r)}</p> : null}
                   <div className="flex items-center gap-3 text-sm">
                     <TimeDisplay seconds={r.chip_time_seconds} source={r.time_source} />
                     {r.overall_rank ? <span className="text-muted-foreground">{position(r)}</span> : null}

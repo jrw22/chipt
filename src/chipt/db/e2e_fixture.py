@@ -49,6 +49,15 @@ def _guard(athlete_id: int) -> None:
                  "never the real one (DEFAULT_ATHLETE_ID).")
 
 
+async def _delete_manual_entries(conn, athlete_id: int) -> None:
+    """Remove results the smoke tests typed in (manual-entry events are keyed `<athlete id>:…`)."""
+    await conn.execute(
+        text("DELETE FROM event e USING provider p WHERE p.id = e.provider_id AND p.slug = 'manual' "
+             "AND e.external_id LIKE :prefix"),
+        {"prefix": f"{athlete_id}:%"},
+    )
+
+
 async def setup(athlete_id: int, out: Path) -> None:
     engine = get_engine()
     async with engine.begin() as conn:
@@ -62,6 +71,7 @@ async def setup(athlete_id: int, out: Path) -> None:
             {"id": athlete_id, "name": f"{TEST_NAME_PREFIX} (temporary)"},
         )
         await conn.execute(text("DELETE FROM claimed_result WHERE athlete_id = :id"), {"id": athlete_id})
+        await _delete_manual_entries(conn, athlete_id)
         row = (await conn.execute(text(_FIXTURE_SQL))).mappings().first()
     await engine.dispose()
     if row is None:
@@ -74,6 +84,7 @@ async def setup(athlete_id: int, out: Path) -> None:
 async def teardown(athlete_id: int) -> None:
     engine = get_engine()
     async with engine.begin() as conn:
+        await _delete_manual_entries(conn, athlete_id)
         # Claims cascade with the athlete. Only ever delete a test athlete.
         await conn.execute(
             text("DELETE FROM athlete WHERE id = :id AND display_name LIKE :prefix"),
