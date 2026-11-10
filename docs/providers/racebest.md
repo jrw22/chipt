@@ -96,6 +96,30 @@ Several athletes recur across years (e.g. Ben Jarvis: Holmfirth 2024 and 2026 pl
   chosen races, because RaceBest seems to publish finishers only.
 - Names go through `clean_name`, so all-caps names are title-cased.
 
+## Races (expanded 2026-11-10)
+
+robots.txt re-checked first (still none / 404). Other years of a series come from each results page's `series` JSON. **58 events, 20,630 results:**
+
+| Series | Years | Labels |
+|---|---|---|
+| Holmfirth 10K | 2023–26 | running / 10K |
+| Vale of York Half Marathon (+10K from 2022) | 2014–19, 2021–26 | Half Marathon, 10K |
+| Harrogate Triathlon | 2017–19, 2021–26 | Sprint (+ Super Sprint 2025–26) |
+| Tad Tri (Tadcaster Triathlon) | 2018–19, 2021–26 | Sprint |
+| Skipton Triathlon | 2023–24 | Sprint |
+| Bassenthwaite Triathlon | 2021–24 | Sprint, Olympic ("Standard") |
+| Coquet River Sprint Triathlon | 2023–24 | Sprint, Aquabike Sprint |
+| Mouth of the Tyne Aquathlon | 2021–23 | **Aquathlon** (swim + run; 2024 has no results yet) |
+
+Left out: junior races, "Try A Tri" beginner races, the Richmond Aquathlon (junior distances), and future races.
+
+**Older page formats** (fixed 2026-11-10):
+- Distance/wave column named **"Contest"** or **"EventDescr"**. Without this, Vale of York 2022/23 and Bassenthwaite 2022 had their 10K/Sprint runners merged into one event. Those three events were deleted and re-ingested split.
+- "Full name", "Chip position"/"Gun position" columns.
+- Contest named just **"Half"**.
+- Cells that are ints or `null`.
+- Pages with **no distance at all** (Harrogate 2017/18, Tad Tri 2018): `RACES` entries can carry a `distance` hint ("Sprint").
+
 ## How to add a race
 
 1. Find the race on https://racebest.com/results. The code is the last path segment, e.g.

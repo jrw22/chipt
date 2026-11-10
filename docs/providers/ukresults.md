@@ -61,6 +61,26 @@ That gives **7 events and 2537 results**. A second run left the counts unchanged
 Spot checks against the pages matched exactly: Guy Fawkes 2026 winner David McKinnon 00:57:31 →
 3451 s, and 2024 winner Edward Hobbs 00:54:04 → 3244 s.
 
+### Expanded 2026-11-10
+
+robots.txt re-checked first (`Allow: /`). Series come from the yearly indexes (`/{year}/index.html`). **70 events, 24,418 results:**
+
+| Series (slug) | Years | Label |
+|---|---|---|
+| Guy Fawkes 10 (`fawkes`) | 2015–19, 2021–26 | running / 10 Mile |
+| Thirteen Arches Half Marathon (`13arches`) | 2016–19, 2023–26 | Half Marathon |
+| Dalby Dash 10K (`dalby`) | 2015–19, 2021–26 | 10K |
+| Richmond Castle 10K (`richmond`) | 2015–19, 2021–26 | 10K |
+| Haweswater Half Marathon (`hawes`) | 2015–17, 2019, 2022–26 | Half Marathon |
+| Ian Hesketh Memorial Duathlon (`hesketh`), run 5K / bike 22K / run 5K | 2015–19, 2021–22, 2024–26 | duathlon / **Sprint** (hint) |
+| Darley Moor Sprint Duathlon, May (`darleydumay`) | 2022–26 | duathlon / Sprint (2026: "Adults" section) |
+| Darley Moor Sprint Duathlon, September (`darleydusep`) | 2021–25 | duathlon / Sprint (2025: "Adults" section; juniors skipped) |
+
+**Older page formats** (fixed 2026-11-10):
+- ≈2017–19 tables use **Forename + Surname** instead of Name, and "Cat/Pos" / "Pos/Cat".
+- Hesketh's finish time column is **"Overall"** (DNFs show 00:00:00 and are skipped).
+- Titles saying "Duathlon**s**" (plural) are now recognised as duathlon.
+
 ## Mapping and quirks
 
 - **Running header:** `Pos | Num | M | F | Name | Cat | CatPos | Club | ChipTime | ChipPos | Pace |

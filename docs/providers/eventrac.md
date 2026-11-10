@@ -27,8 +27,17 @@
 | Lancing 10K (`lancing-10k-3750`) | 10K | 2021–2026 (6) |
 | Worthing Seafront 10K (`worthing-seafront-10k-3733`) | 10K | 2023–2026 (4) |
 | Bedgebury Forest Half Marathon & 10K (`bedgebury-forest-half-marathon-and-10k-9257`) | Half Marathon + 10K (junior races skipped) | 2017–2026 (9 each; no 2020) |
+| Hove Prom 10K (`hove-prom-10k-9600`) | 10K | 2015–2026 (10) |
+| Reading Town 10K (`reading-town-10k-charity-3742`) | 10K | 2021–2026 |
+| Sheffield City 10K (`sheffield-city-10k-charity-fun-run-3732`) | 10K | 2021–2026 |
+| Sandown & Shanklin (IoW) Seafront 10K (`sandown-and-shanklin-i-o-w-seafront-10k-3738`) | 10K | 2021–2026 |
+| Chelmsford Marathon & Half (`chelmsford-marathon-and-half-marathon-9483`) | Marathon + Half Marathon | 2016–2026 (10 yrs) |
+| Tissington Trail Half Marathon (`tissington-trail-half-marathon-weekend-9222`) | Half Marathon | 2014–2026 (11 yrs) |
+| Folkestone Rotary Half Marathon (`folkestone-rotary-half-marathon-9459`) | Half Marathon | 2012–2026 (14 yrs) |
+| Eridge Park 10 Trail Challenge (`eridge-park-10-trail-challenge-9457`) | 10 Mile (via `DISTANCE_HINTS`: older races are named just "2021") | 2017–2026 (8) |
+| Stebbing 10 (`stebbing-10-10036`) | 10 Mile | 2021–2026 |
 
-**First ingest (2026-11-10):** 28 events and 6,312 results (19 × 10K, 9 × Half Marathon). Re-ingesting gives identical counts. `external_id` is Eventrac's results id.
+**First ingest (2026-11-10):** 28 events and 6,312 results. **Expanded the same day to 113 events and 39,835 results** (47 × 10K, 42 × Half Marathon, 14 × 10 Mile, 10 × Marathon). Re-ingesting gives identical counts. `external_id` is Eventrac's results id.
 
 ## Running it
 ```bash
