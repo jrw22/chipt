@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- Eventrac provider (route 1): reads each event's results index (dates, race names) and the static results tables. Ingested Lancing 10K (2021–26), Worthing Seafront 10K (2023–26) and Bedgebury Forest Half Marathon + 10K (2017–26): 28 events, 6,312 results. Anonymised athletes are skipped by design; a bare "Time" is stored as `unspecified`.
 - Manual import (route 3): `chipt-import <provider> <files> [--date] [--dry-run]`, a network-free `FileImportScraper` base, the `manual` ingest type (added to existing DBs by re-running `chipt-initdb`), and the gitignored `imports/` folder for owner-saved pages.
 - British Triathlon importer: parses saved results pages ("Webpage, Complete", 50 rows per page) into one event per race. It handles Sprint Plus, Starter, Standard → Olympic, Middle, duathlon, aquabike and aquathlon labels, Saturday/Sunday dates from `--date`, and DNFs. `--race` names the race, because saved pages don't record the dropdown choice. First real import: Belvoir 2026 Triathlon Sprint (243 results).
 - IRONMAN provider notes (`docs/providers/ironman.md`): not scrapable (`Claude-User` disallowed; terms forbid scraping and database use, as reported), so the route is the official API, with a user-run API spike next.
@@ -44,6 +45,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Streamlit UI with three pages: Find & Claim, My Results and Analysis (time-series chart, PB/trend tiles, pace).
 
 ### Changed
+- `PoliteClient` follows redirects one hop at a time and checks robots.txt and the rate limit on **every** hop. Before this, httpx followed redirects silently, so a redirect to an unchecked host would have been fetched.
 - Spec §8: the MVP's accept/reject rule is replaced by access routes, and the provider table now lists every reviewed platform with its route. V1 phase 2 is redefined: the API-feeds shift is deferred. resultsbase now also opts out `ClaudeBot`/`GPTBot`, and Sporthive's robots.txt now allows results (but the MYLAPS terms forbid copying).
 - `CORS_ALLOWED_ORIGINS` now defaults to the web app only (`http://localhost:3000`). Next.js `distDir` can be overridden with `NEXT_DIST_DIR`, so the smoke test's dev server doesn't clash with yours.
 - `.env.example`: Postgres host port is now 5433, so it doesn't clash with a native Postgres on 5432. Added `PROVIDER_RACEBEST_BASE_URL`, `PROVIDER_UKRESULTS_BASE_URL` and `PROVIDER_EVENTCHIPTIMING_BASE_URL`.
