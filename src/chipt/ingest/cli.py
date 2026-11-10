@@ -17,6 +17,8 @@ from chipt.ingest.base import BaseScraper, EventRef
 
 # slug -> "module:ClassName"
 PROVIDERS: dict[str, str] = {
+    # resultsbase (results.resultsbase.net, RaceTec): must be run by a person, not an AI agent
+    # (see docs/providers/resultsbase.md)
     "resultsbase": "chipt.ingest.providers.resultsbase:ResultsbaseScraper",
     # runthrough: must be run by a person, not an AI agent (see docs/providers/runthrough.md)
     "runthrough": "chipt.ingest.providers.runthrough:RunThroughScraper",

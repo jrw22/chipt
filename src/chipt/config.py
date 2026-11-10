@@ -39,7 +39,8 @@ class Settings(BaseSettings):
     playwright_headless: bool = True
     playwright_browser: str = "chromium"
 
-    provider_resultsbase_base_url: str = "https://www.resultsbase.net"
+    # RaceTec results host (user-run only). www.resultsbase.net (Sportstiming) stays blocked.
+    provider_resultsbase_results_url: str = "https://results.resultsbase.net"
     provider_runthrough_base_url: str = "https://results.runthrough.co.uk"
     provider_eventchiptiming_base_url: str = "https://results.eventchiptiming.com"
     provider_eventrac_base_url: str = "https://www.eventrac.co.uk"

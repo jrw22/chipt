@@ -25,7 +25,7 @@
 - **Cheapest wins overall:** three more **RaceTec** sites, **Net Timing**, **Race Timing Solutions** and **Timing Up North**. Each would be ~20 lines on the existing `racetec.py` base, but they're **user-run** (route 2) because they opt out of AI agents.
 - **Two MVP verdicts changed:**
   - **Sporthive's** robots.txt now allows results (only live timing is blocked). It's still route 5, because the MYLAPS terms forbid downloading or copying data.
-  - **resultsbase** now also opts out `ClaudeBot`/`GPTBot` (and it's still behind Turnstile).
+  - **resultsbase** now also opts out `ClaudeBot`/`GPTBot` (and it's still behind Turnstile). **Update 2026-11-10:** its separate RaceTec host, `results.resultsbase.net` (e.g. the Cambridge Half), is route 2 (user-run, built).
 
 ## Access routes
 
@@ -81,7 +81,8 @@ Abbreviations:
 | **Opentrack** (opentrack.run) | **AI opt-out** | Not reviewed | n/a | n/a | **2** |
 | **Fetch Everyone** (fetcheveryone.com) | **AI opt-out** | Not reviewed | n/a | n/a | **2** |
 | **Power of 10 / runbritain** | None (404) | n/a | **Sign-in page with reCAPTCHA** (results need a login) | n/a | **5** |
-| **resultsbase** (resultsbase.net) | `ClaudeBot`, `GPTBot` disallowed (**new** since the MVP); `*` allows results | None | **Turnstile** | n/a | **3** (data stays out of LLM features) |
+| **resultsbase** (www.resultsbase.net, Sportstiming) | `ClaudeBot`, `GPTBot` disallowed (**new** since the MVP); `*` allows results | None | **Turnstile** | n/a | **3** (data stays out of LLM features) |
+| **resultsbase RaceTec** (results.resultsbase.net) | **AI opt-out** (RaceTec default, checked 2026-11-10); no `*` group | None published | Not checked (results pages not fetched) | RaceTec, 50 rows/page | **2 ✅ built** (Cambridge Half 2025; `resultsbase.md`) |
 | **Webscorer** | Open | Forbids scraping/copying (MVP spike) | None | n/a | **5** |
 | **Athlinks** (US; ChronoTrack, used by EMIT UK) | Open | Terms page is a JS app, not verified | None | JS | **5** |
 | **Let's Do This** (entries) | n/a (**CF on robots.txt**) | n/a | **CF** | Entries, not results | **6** |

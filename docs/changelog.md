@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **resultsbase RaceTec scraper** (`results.resultsbase.net`, CId 8), user-run only because of the RaceTec AI-agent opt-out. It replaces the blocked Sportstiming stub, keeps the `resultsbase` slug, and pins the Cambridge Half Marathon 2025 (`20708:1`, 16,000+ results, ~330 pages). New setting `PROVIDER_RESULTSBASE_RESULTS_URL`, which replaces `PROVIDER_RESULTSBASE_BASE_URL`.
+- RaceTec base: `MAX_RESULT_PAGES` is now a per-subclass class attribute (default 200, resultsbase 400). It logs progress every 25 pages, and a "TRUNCATED" warning if the cap is hit while more pages remain (it used to stop silently).
 - **Manual entry of your own results** for platforms Chipt can't read (prompted by IRONMAN). `POST /me/results/manual` stores a typed-in result under a `manual` provider ("Manual entry") and claims it. It's idempotent (one event per athlete + race + date + distance), sets `distance_km` from the label for single-discipline races (null for multi-sport), and flags entries from AI-opted-out platforms (`raw.ai_opt_out`). `ResultOut` gains `manual_entry` and `source_platform`. The web app adds an **"Add a result"** dialog on My results (and its empty state). Manual entries show a "Manual entry · <platform>" label, and the detail view shows positions without "of N" field sizes. A second Playwright test covers add → My results → detail → analysis → remove, and the e2e teardown deletes the test athlete's manual entries.
 
 ### Changed

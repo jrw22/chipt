@@ -22,8 +22,8 @@ uv run chipt-ingest racebest          # hand-picked races for a provider
 uv run chipt-ingest ukresults
 uv run chipt-ingest eventrac          # Lancing / Worthing 10K, Bedgebury Half & 10K (multi-year)
 uv run chipt-ingest racebest --url <race-results-url>     # one specific race
-# runthrough, eventchiptiming: run by hand only (AI opt-out), see docs/providers/
-# resultsbase: stub, blocked by Cloudflare
+# runthrough, eventchiptiming, resultsbase: run by hand only (AI opt-out), see docs/providers/
+#   e.g. uv run chipt-ingest resultsbase   # Cambridge Half 2025, ~330 pages, ~11 min first time
 ```
 Re-running is idempotent. Raw responses are cached in `SCRAPER_CACHE_DIR`, so re-parsing doesn't re-fetch.
 Per-provider legal posture and notes: [docs/providers/](docs/providers/).

@@ -7,12 +7,12 @@ organisers under their own subdomains, all with the same URL scheme:
     <base>/results.aspx?CId=<client>&RId=<race>[&EId=<n>]  # results for one race (EId = sub-event)
 
 Each provider is a small subclass in its own module that sets `provider`, `BASE_URL`,
-`CLIENT_ID` and its hand-picked `RACES` (see runthrough.py, eventchiptiming.py).
+`CLIENT_ID` and its hand-picked `RACES` (see runthrough.py, eventchiptiming.py, resultsbase.py).
 
 WHO RUNS THIS — read first
 --------------------------
 The RaceTec results subdomains seen so far (results.runthrough.co.uk,
-results.eventchiptiming.com) publish a robots.txt that disallows AI crawlers *and* AI
+results.eventchiptiming.com, results.resultsbase.net) publish a robots.txt that disallows AI crawlers *and* AI
 agents (ClaudeBot, Claude-User, GPTBot, ...) but has no rule for generic bots. So:
 
 * This code was written WITHOUT fetching or inspecting any RaceTec results page.
@@ -59,7 +59,8 @@ log = logging.getLogger(__name__)
 
 MAX_LISTING_PAGES = 15  # listing is 20 races/page; cap request volume
 MAX_DISCOVERED = 6
-MAX_RESULT_PAGES = 200  # safety cap on results pagination per race
+MAX_RESULT_PAGES = 200  # default safety cap on results pagination per race (subclasses may raise it)
+PROGRESS_EVERY = 25  # log fetch progress every N results pages
 
 # Normalised header text -> canonical field. Exact match after normalisation.
 COLUMN_SYNONYMS: dict[str, list[str]] = {
@@ -340,6 +341,8 @@ class RaceTecScraper(BaseScraper):
     RACES: list[str] = []
     # Used only when RACES is empty: discover() scans the race listing for these names.
     RACE_NAME_PATTERNS: list[str] = []
+    # Most results pages to follow per race. Raise it for very big races (e.g. city halves).
+    MAX_RESULT_PAGES: int = MAX_RESULT_PAGES
 
     # -- discovery ---------------------------------------------------------- #
     def results_url(self, rid: str, eid: str | None = None) -> str:
@@ -424,11 +427,16 @@ class RaceTecScraper(BaseScraper):
         pages = [self.http.get(ref.url)]
         page_url, current = ref.url, 1
         seen_bodies = {_table_fingerprint(pages[0])}
-        while len(pages) < MAX_RESULT_PAGES:
+        while True:
             soup = BeautifulSoup(pages[-1], "html.parser")
             # Next page = smallest page number greater than the current one (handles "..." links).
             nxt = next((p for p in pager_links(soup, page_url, ref.meta.get("rid", "")) if p["page"] > current), None)
             if nxt is None:
+                break
+            if len(pages) >= self.MAX_RESULT_PAGES:
+                log.warning("%s: stopped at the %d-page cap with more pages left; results are TRUNCATED. "
+                            "Raise MAX_RESULT_PAGES on %s.", ref.external_id, self.MAX_RESULT_PAGES,
+                            type(self).__name__)
                 break
             if nxt["kind"] == "get":
                 html = self.http.get(nxt["url"])
@@ -450,6 +458,8 @@ class RaceTecScraper(BaseScraper):
             seen_bodies.add(fp)
             pages.append(html)
             current = nxt["page"]
+            if len(pages) % PROGRESS_EVERY == 0:
+                log.info("%s: fetched %d results pages so far", ref.external_id, len(pages))
         log.info("Fetched %d results page(s) for %s", len(pages), ref.external_id)
         return pages
 
