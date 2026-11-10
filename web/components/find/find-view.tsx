@@ -83,7 +83,7 @@ export function FindView() {
         <ResultsSkeleton />
       ) : search.data.length === 0 ? (
         <EmptyState icon={SearchX} title={`No results for “${params.name}”`}>
-          Try a different spelling, just your surname, or fewer filters.
+          Try the spelling the race used, just your surname, or fewer filters.
         </EmptyState>
       ) : (
         <div className={search.isPlaceholderData ? "opacity-60 transition-opacity" : undefined}>

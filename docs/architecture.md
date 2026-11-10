@@ -88,7 +88,8 @@ owner's browser ──▶ saved file in imports/<provider>/ ──▶ chipt-impo
 - **`time_source`** (on every result): `chip`, `gun` or `unspecified`, i.e. what `chip_time_seconds` actually holds. It's derived in SQL (`_TIME_SOURCE` in `chipt.db.repository`) from the raw payload. RaceTec scrapers record `_time_source`, and RaceBest/UKResults record the source column in `_chipt_time_source`. A bare "Time" column becomes `unspecified`.
 - **Search score:** `GREATEST(similarity(name), word_similarity(name))`. The WHERE clause uses the
   `%` / `<%` operators, so the GIN trigram index is used. The threshold is
-  `SEARCH_SIMILARITY_THRESHOLD`, applied per transaction.
+  `SEARCH_SIMILARITY_THRESHOLD` (default 0.7, i.e. the UI's "70% match"), applied per transaction. Because the
+  operators use the same two functions as the score, every candidate scores at least the threshold.
 - **Analysis:** `chipt.analysis.timeseries.analyse_group` is pure, with no DB access. It returns
   points sorted by date; pace only when `distance_km` is set; the PB; most recent vs PB; and a trend
   from a linear fit of seconds against years. The trend is "improving" when the slope is below −1% of

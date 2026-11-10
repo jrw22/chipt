@@ -63,7 +63,7 @@ export function SearchForm({
           </Button>
         </div>
         <p className="text-xs text-muted-foreground">
-          Spelling doesn&apos;t need to be exact. Matches are ranked by how closely the name fits.
+          Close spellings still match. Only strong matches are shown, closest first.
         </p>
       </div>
       <fieldset className="grid grid-cols-2 gap-3 lg:grid-cols-4">

@@ -15,7 +15,7 @@ class Settings(BaseSettings):
 
     # Database
     database_url: str = "postgresql+asyncpg://chipt:change-me@localhost:5433/chipt"
-    search_similarity_threshold: float = 0.3
+    search_similarity_threshold: float = 0.7
     search_max_results: int = 50
 
     # API

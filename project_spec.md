@@ -207,7 +207,7 @@ For MVP the providers are (decided after the §8 feasibility spike):
 ### 5.6 Search & identity resolution
 
 - Search inputs: **name** (required), optional **discipline, provider, race name, age group**.
-- **Matching:** `pg_trgm` similarity on `athlete_name` + exact/filter on the structured fields, returning candidates ranked by a confidence score.
+- **Matching:** `pg_trgm` similarity on `athlete_name` + exact/filter on the structured fields, returning candidates ranked by a confidence score. Only candidates scoring **≥ 0.7** ("70% match") are shown (`SEARCH_SIMILARITY_THRESHOLD`; was 0.3 until 2026-11-10, issue #12).
 - User reviews candidates and **claims** the ones that are theirs → `claimed_result`.
 - Claim data becomes training signal for smarter matching later (and LLM-assisted matching in the "Later" milestone).
 
@@ -265,6 +265,7 @@ For MVP the providers are (decided after the §8 feasibility spike):
 - **V1 frontend:** Next.js 15 + Tailwind + shadcn/ui, TanStack Query, OpenAPI-generated types; Streamlit retired at parity (V1 phase 1, done). §5.9
 - **V1 phase 2 (2026-11-09):** the shift to API feeds is **deferred**. Phase 2 is instead a results-platform review with **access routes** (direct scrape / user-run / manual import / trace to source / permission / reject), a manual-import path (British Triathlon first), and 2–3 more route-1 providers. §8
 - **V1 testing:** light automated checks: `npm run check` plus a Playwright smoke test run against the local DB as a throwaway test athlete. §6
+- **Search threshold (2026-11-10, issue #12):** show only matches scoring ≥ 70% (was 30%), so results are mostly real candidates. The trade-off is that loose variants (Jon/John, initials) drop out; surname-only searches still match at 100%. §5.6
 - **MVP identity:** single hardcoded profile. §4
 - **MVP deployment:** local-only (Docker Postgres + local FastAPI/Streamlit). §6
 - **MVP providers:** RaceBest and UKResults are ingested. RunThrough and Event Chip Timing are user-run only (AI opt-out in robots.txt). resultsbase's www host is blocked by a Cloudflare challenge (its RaceTec results host is user-run, added in V1). Never bypass bot checks or AI opt-outs. §5.5, §8
