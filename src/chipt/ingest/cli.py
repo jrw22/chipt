@@ -23,6 +23,7 @@ PROVIDERS: dict[str, str] = {
     # eventchiptiming: must be run by a person, not an AI agent (see docs/providers/eventchiptiming.md)
     "eventchiptiming": "chipt.ingest.providers.eventchiptiming:EventChipTimingScraper",
     "racebest": "chipt.ingest.providers.racebest:RacebestScraper",
+    "eventrac": "chipt.ingest.providers.eventrac:EventracScraper",
     "ukresults": "chipt.ingest.providers.ukresults:UkresultsScraper",
 }
 

@@ -5,7 +5,7 @@
 **Sports covered:** running, cycling, swimming, triathlon (and duathlon).
 
 **MVP scope:**
-- Ingest ≥2 races from each of ≥2 hand-picked providers by scraping. MVP providers: **RaceBest** (racebest.com) and **UKResults** (ukresults.net). RunThrough and Event Chip Timing are user-run only because of an AI opt-out, and resultsbase is blocked by Cloudflare (see `docs/providers/`). V1 phase 2 assigns every platform an **access route**: see `docs/providers/platform_review.md`
+- Ingest ≥2 races from each of ≥2 hand-picked providers by scraping. MVP providers: **RaceBest** (racebest.com) and **UKResults** (ukresults.net); V1 added **Eventrac** (route 1) and **British Triathlon** (manual import). RunThrough and Event Chip Timing are user-run only because of an AI opt-out, and resultsbase is blocked by Cloudflare (see `docs/providers/`). V1 phase 2 assigns every platform an **access route**: see `docs/providers/platform_review.md`
 - Single user, no authentication: one hardcoded `athlete` row
 - Search results by name (required) plus optional discipline, provider, race name and age group, then **claim** the results that belong to the user
 - Analysis: a time series of the user's headline (chip) results within a comparison group of `(discipline, distance_label)`, e.g. running / 10K

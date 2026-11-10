@@ -20,6 +20,7 @@ uv run chipt-initdb           # create schema + seed the single MVP athlete (saf
 uv run chipt-ingest --list            # configured providers
 uv run chipt-ingest racebest          # hand-picked races for a provider
 uv run chipt-ingest ukresults
+uv run chipt-ingest eventrac          # Lancing / Worthing 10K, Bedgebury Half & 10K (multi-year)
 uv run chipt-ingest racebest --url <race-results-url>     # one specific race
 # runthrough, eventchiptiming: run by hand only (AI opt-out), see docs/providers/
 # resultsbase: stub, blocked by Cloudflare

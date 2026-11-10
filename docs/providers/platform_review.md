@@ -71,8 +71,8 @@ Abbreviations:
 
 | Platform | robots.txt | Terms | Bot protection | Delivery | Route |
 |---|---|---|---|---|---|
-| **Eventrac** (eventrac.co.uk) | Open; no AI opt-out (disallows `/api/`, `/admin/`, `/results/claim/`) | Participant terms: no scraping/automated-access clause | None | **Hosted results: static HTML, whole field in one table** (Position, First/Last Name, Gender, Time). Some events link out to RaceResult / Sporthive / Timing Up North | **1 ✅ shortlist** |
-| **race-results.co.uk** (SportSoft) | Open (disallows `/onlineentries/`) | None found | None | Static yearly listing → organisers' **PDF / Excel / HTML** files (northern England running, fell, duathlon) | **1 ✅ shortlist** (parser per format) |
+| **Eventrac** (eventrac.co.uk) | Open; no AI opt-out (disallows `/api/`, `/admin/`, `/results/claim/`) | Participant terms: no scraping/automated-access clause | None | **Hosted results: static HTML, whole field in one table** (Position, First/Last Name, Gender, Time). Some events link out to RaceResult / Sporthive / Timing Up North | **1 ✅ built** (`eventrac.md`) |
+| **race-results.co.uk** (SportSoft) | Open (disallows `/onlineentries/`) | None found | None | Static yearly listing → organisers' **PDF / Excel / HTML** files (northern England running, fell, duathlon) | **1, parked** by the owner (parser per format) |
 | **Net Timing** (results.netiming.co.uk) | **AI opt-out**; no `*` group | n/a | n/a | RaceTec (`?CId=20008`) | **2** (cheap: `racetec.py`) |
 | **Race Timing Solutions** (results.racetimingsolutions.co.uk) | **AI opt-out** | n/a | n/a | RaceTec | **2** (cheap) |
 | **Timing Up North** (timingupnorthresults.co.uk) | **AI opt-out** | n/a | n/a | RaceTec (probably) | **2** (cheap) |
