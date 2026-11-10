@@ -27,6 +27,16 @@ uv run chipt-ingest racebest --url <race-results-url>     # one specific race
 Re-running is idempotent. Raw responses are cached in `SCRAPER_CACHE_DIR`, so re-parsing doesn't re-fetch.
 Per-provider legal posture and notes: [docs/providers/](docs/providers/).
 
+## Import saved results pages (manual import)
+For sites that block automated access (e.g. British Triathlon), save the results page in your own browser
+into `imports/<provider>/` (gitignored), then:
+```bash
+uv run chipt-import --list
+uv run chipt-import britishtriathlon imports/BritishTriathlon/belvoir-2026-*.html --date 2026-07-18 --dry-run   # check first
+uv run chipt-import britishtriathlon imports/BritishTriathlon/belvoir-2026-*.html --date 2026-07-18
+```
+How to save each provider's pages is in its `docs/providers/<slug>.md`. Re-importing is idempotent.
+
 ## Run the app
 Two processes: the FastAPI backend and the Next.js web app (needs Node 22; `nvm use` reads `web/.nvmrc`).
 ```bash

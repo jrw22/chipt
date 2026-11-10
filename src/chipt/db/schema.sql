@@ -5,6 +5,8 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 DO $$ BEGIN
     CREATE TYPE ingest_type AS ENUM ('scrape', 'api');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+-- V1 phase 2: manual import (route 3). Added separately so re-running upgrades an existing DB.
+ALTER TYPE ingest_type ADD VALUE IF NOT EXISTS 'manual';
 
 DO $$ BEGIN
     CREATE TYPE discipline AS ENUM ('running', 'cycling', 'swimming', 'triathlon', 'duathlon');

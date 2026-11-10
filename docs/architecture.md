@@ -24,6 +24,14 @@ provider site ──▶ PoliteClient (robots.txt, rate limit, honest UA, retries
               ──▶ ingest_repo.upsert_*  ──▶ PostgreSQL
 ```
 
+Manual import (route 3, for bot-checked sites):
+
+```
+owner's browser ──▶ saved file in imports/<provider>/ ──▶ chipt-import <provider> <files> [--date]
+                ──▶ FileImportScraper.discover() (the files) → fetch() (read file, never the network) → parse()
+                ──▶ the same ingest_repo upserts ──▶ PostgreSQL   (provider.ingest_type = 'manual')
+```
+
 - Ingestion is decoupled. Scrapers run as manual CLI jobs and never on demand.
 - Upserts are idempotent. Events are keyed on `(provider_id, external_id)` and results on
   `(event_id, athlete_name, chip_time_seconds)`. Re-ingestion updates rows in place, so result ids

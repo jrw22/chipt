@@ -26,6 +26,7 @@ js = ["playwright>=1.45"]
 
 [project.scripts]
 chipt-ingest = "chipt.ingest.cli:main"
+chipt-import = "chipt.ingest.import_cli:main"
 chipt-initdb = "chipt.db.init:main"
 chipt-openapi = "chipt.api.openapi:main"
 
