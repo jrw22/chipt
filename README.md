@@ -32,8 +32,8 @@ For sites that block automated access (e.g. British Triathlon), save the results
 into `imports/<provider>/` (gitignored), then:
 ```bash
 uv run chipt-import --list
-uv run chipt-import britishtriathlon imports/BritishTriathlon/belvoir-2026-*.html --date 2026-07-18 --dry-run   # check first
-uv run chipt-import britishtriathlon imports/BritishTriathlon/belvoir-2026-*.html --date 2026-07-18
+uv run chipt-import britishtriathlon imports/BritishTriathlon/belvoir-2026-sprint-p*.html \
+    --date 2026-07-18 --race "Triathlon Sprint" --dry-run   # check first, then drop --dry-run
 ```
 How to save each provider's pages is in its `docs/providers/<slug>.md`. Re-importing is idempotent.
 

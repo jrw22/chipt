@@ -5,11 +5,12 @@ britishtriathlon.org sits behind a Cloudflare challenge, so it is never fetched 
 in the "Result" dropdown, and saves each 50-row page with File → Save Page As → "Webpage,
 Complete" (which keeps the rows the site's JavaScript filled in). Then:
 
-    uv run chipt-import britishtriathlon imports/BritishTriathlon/belvoir-2026-*.html --date 2026-07-18 --dry-run
-    uv run chipt-import britishtriathlon imports/BritishTriathlon/belvoir-2026-*.html --date 2026-07-18
+    uv run chipt-import britishtriathlon imports/BritishTriathlon/belvoir-2026-triathlon-sprint-*.html \
+        --date 2026-07-18 --race "Triathlon Sprint" --dry-run
 
 The table columns are: Pos, Athlete, Race Category (Open/Female), AG, Club, Overall (the finish
-time), Stage 1, T1, Stage 2, T2, Stage 3, (blank), Race. Splits are kept in `raw` only (out of
+time), Stage 1, T1, Stage 2, T2, Stage 3, (share links). The saved page doesn't record which race
+was picked in the dropdown, so name it with --race ("Triathlon Sprint", or the result id). Splits are kept in `raw` only (out of
 MVP scope). Saved pages don't show the event date, so `--date` is required. If it's a Saturday
 and a race is named "... - Sunday" (or the reverse), that race's date is shifted by a day.
 """
@@ -122,11 +123,32 @@ def _page_info(soup: BeautifulSoup) -> tuple[str | None, str, str | None]:
     return (m.group(1) if m else None), title or "British Triathlon event", page_url
 
 
-def _selected_race(soup: BeautifulSoup) -> str | None:
-    """The race picked in the "Result" dropdown, if the saved page recorded it."""
+def race_options(soup: BeautifulSoup) -> list[tuple[str, str]]:
+    """[(result id, race name)] from the page's "Result" dropdown.
+
+    The saved page does NOT record which one was picked (the `selected` attribute is the page's
+    default, not the owner's choice), so the race must come from `--race`.
+    """
     sel = soup.find("select", attrs={"name": "result"})
-    opt = sel.find("option", selected=True) if sel else None
-    return _text(opt) if opt and opt.get("value") else None
+    return [(o.get("value"), _text(o)) for o in (sel.find_all("option") if sel else []) if o.get("value")]
+
+
+def resolve_race(choice: str, options: list[tuple[str, str]]) -> str:
+    """Match `--race` (a result id, or a race name like "Triathlon Sprint") to one dropdown entry.
+
+    Names match the short name exactly first ("Triathlon Sprint" doesn't match "... Sprint Plus"),
+    then by unique substring. Raises ValueError listing the choices when ambiguous or unknown.
+    """
+    c = choice.strip().lower()
+    by_id = [name for rid, name in options if rid == choice.strip()]
+    exact = [name for _, name in options if race_short_name(name).lower() == c]
+    partial = [name for _, name in options if c in name.lower()]
+    for hits in (by_id, exact, partial):
+        if len(hits) == 1:
+            return hits[0]
+    listing = "\n".join(f"  {rid}  {race_short_name(name)}" for rid, name in options)
+    problem = "matches several races" if len(partial) > 1 else "matches no race"
+    raise ValueError(f"--race {choice!r} {problem}. Choose one of:\n{listing}")
 
 
 def _results_rows(soup: BeautifulSoup) -> tuple[list[str], list[dict]]:
@@ -169,10 +191,24 @@ class BritishTriathlonImporter(FileImportScraper):
                       ref.meta["file"])
             return []
 
-        fallback_race = _selected_race(soup) or ref.meta["file"]
+        # Saved pages carry no record of the chosen race (and usually no Race column), so the
+        # owner names it with --race. A per-row Race column, if present, wins.
+        page_race = None
+        if any(not r.get("race") for r in rows):
+            choice = self.options.get("race")
+            if not choice:
+                listing = "\n".join(f"  {rid}  {race_short_name(n)}" for rid, n in race_options(soup))
+                log.error("%s: the saved page doesn't say which race it is. Pass --race with one of:\n%s",
+                          ref.meta["file"], listing)
+                return []
+            try:
+                page_race = resolve_race(choice, race_options(soup))
+            except ValueError as e:
+                log.error("%s: %s", ref.meta["file"], e)
+                return []
         groups: dict[str, list[dict]] = defaultdict(list)
         for r in rows:
-            groups[r.get("race") or fallback_race].append(r)
+            groups[r.get("race") or page_race].append(r)
 
         events = []
         for race, group in groups.items():

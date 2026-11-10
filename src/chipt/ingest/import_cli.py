@@ -48,6 +48,7 @@ def main() -> None:
     ap.add_argument("files", nargs="*", help="Saved results files (HTML/JSON), e.g. imports/<provider>/*.html")
     ap.add_argument("--date", type=date.fromisoformat,
                     help="Event date (YYYY-MM-DD) when the saved page doesn't show it")
+    ap.add_argument("--race", help="Which race the saved pages are (provider-specific, e.g. \"Triathlon Sprint\")")
     ap.add_argument("--dry-run", action="store_true", help="Parse and summarise only; no database writes")
     ap.add_argument("--list", action="store_true", help="List importers")
     args = ap.parse_args()
@@ -59,7 +60,7 @@ def main() -> None:
     if not args.files:
         ap.error("give at least one saved results file")
 
-    importer = load_importer(args.provider, args.files, event_date=args.date)
+    importer = load_importer(args.provider, args.files, event_date=args.date, race=args.race)
     if args.dry_run:
         _dry_run(importer)
     else:

@@ -13,7 +13,7 @@
 
 ## Manual import (built)
 
-**How the page works:** an event's results page (e.g. `…_17201`) has a **Result** dropdown with one entry per race. Belvoir 2026 has 17: triathlon Super Sprint/Sprint/Sprint Plus/Starter/Standard/Middle, duathlon, aquabike and aquathlon Sprint/Standard(/Middle), plus junior TriStar/Youth races. The table is filled in by JavaScript, **50 rows per page**, with no option to show more. Columns: Pos, Athlete, Race Category (Open/Female), AG, Club, Overall (finish time), Stage 1, T1, Stage 2, T2, Stage 3, Race. **The page does not show the event date.**
+**How the page works:** an event's results page (e.g. `…_17201`) has a **Result** dropdown with one entry per race. Belvoir 2026 has 17: triathlon Super Sprint/Sprint/Sprint Plus/Starter/Standard/Middle, duathlon, aquabike and aquathlon Sprint/Standard(/Middle), plus junior TriStar/Youth races. The table is filled in by JavaScript, **50 rows per page**, with no option to show more. Columns: Pos, Athlete, Race Category (Open/Female), AG, Club, Overall (finish time), Stage 1, T1, Stage 2, T2, Stage 3, and share links. **The saved page shows neither the event date nor which race was picked**: the dropdown's `selected` option in a saved page is the page default (TriStar 1), not your choice. Splits were blank for the Belvoir 2026 sprint.
 
 **Owner workflow:**
 1. Open the event's results page in your browser and pick your race in **Result**.
@@ -21,8 +21,13 @@
 3. Put them in `imports/BritishTriathlon/` (gitignored).
 4. Check, then import:
    ```bash
-   uv run chipt-import britishtriathlon imports/BritishTriathlon/belvoir-2026-*.html --date <Saturday YYYY-MM-DD> --dry-run
-   uv run chipt-import britishtriathlon imports/BritishTriathlon/belvoir-2026-*.html --date <Saturday YYYY-MM-DD>
+   uv run chipt-import britishtriathlon imports/BritishTriathlon/belvoir-2026-sprint-p*.html \
+       --date 2026-07-18 --race "Triathlon Sprint" --dry-run
+   uv run chipt-import britishtriathlon imports/BritishTriathlon/belvoir-2026-sprint-p*.html \
+       --date 2026-07-18 --race "Triathlon Sprint"
+   ```
+   **`--race`** names the race: an exact short name like "Triathlon Sprint" (which doesn't match "Sprint Plus"), or its result id (`57561`). Without it, or if it's ambiguous, the importer lists every race on the page. **Import one race per command**, because `--date` and `--race` apply to every file given.
+   ```
    ```
 
 **What the importer does** (`src/chipt/ingest/providers/britishtriathlon.py`):
@@ -37,5 +42,5 @@
   - "Race Category" (Open/Female) is stored as published in `gender`, and AG is stored as published in `age_group`.
   - A non-numeric Pos (DNF/DSQ) with a time → `finisher = false`. Rows without a time are skipped.
   - Splits and club are kept in `raw` only.
-- **Not yet verified on real rows:** the first real "Webpage, Complete" save may need small tweaks (e.g. relay teams, how DNFs appear).
+- **Verified on real data (2026-11-10):** Belvoir 2026 **Triathlon Sprint**, 5 saved pages → 243 results, positions 1–243 complete, imported twice with identical counts (event `17201:triathlon-sprint`). The top 3 Open/Female show AG **"Top3"** instead of an age group (stored as published). No DNFs were listed. Relay rows haven't been seen yet.
 - **Personal use only.** Ask British Triathlon for permission or a feed before V2/public use (see `platform_review.md`, outreach).

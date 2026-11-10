@@ -28,7 +28,7 @@
 
 ## Next up
 - **IRONMAN API spike** (next, owner-paced): the owner signs up at the IRONMAN API Portal and checks the API terms. Then the agent builds the first `api` provider on the user-run pattern (see `docs/providers/ironman.md`)
-- V1 phase 2, step 2 (built on `feature/manual-import`, stacked on PR #8): `chipt-import` + British Triathlon importer, tested on synthetic pages. **Owner action:** re-save the Belvoir race(s) with "Webpage, Complete", one file per 50-row page, and give the Saturday date
+- V1 phase 2, step 2 (built on `feature/manual-import`, stacked on PR #8): `chipt-import` + British Triathlon importer. **Belvoir 2026 Triathlon Sprint imported** (243 results, idempotent)
 - V1 phase 2, step 3: **Eventrac** scraper (approved). race-results.co.uk is parked by the owner
 - V1 phase 2, step 4: more RaceBest/UKResults races
 - Later: API feeds (deferred), advanced analysis, better search
