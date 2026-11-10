@@ -26,6 +26,7 @@ SINGLE_DISCIPLINES = {Discipline.running, Discipline.cycling, Discipline.swimmin
 class IngestType(str, Enum):
     scrape = "scrape"
     api = "api"
+    manual = "manual"  # route 3: files the owner saved in their own browser (chipt-import)
 
 
 # --------------------------------------------------------------------------- #

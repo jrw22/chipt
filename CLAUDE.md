@@ -23,9 +23,10 @@ chipt/
 ├── README.md            # setup + run commands
 ├── project_spec.md      # single source of truth for requirements & design
 ├── brainstorm.md        # original goals/milestones notes
-├── pyproject.toml       # uv project; scripts chipt-ingest, chipt-initdb, chipt-openapi
+├── pyproject.toml       # uv project; scripts chipt-ingest, chipt-import, chipt-initdb, chipt-openapi
 ├── docker-compose.yml   # Postgres 16 on host port 5433
 ├── .env.example         # all config vars; copy to .env
+├── imports/             # owner-saved results pages for `chipt-import` (gitignored: personal data)
 ├── docs/
 │   ├── architecture.md  # components, data flow, API, schema
 │   ├── changelog.md
@@ -37,7 +38,7 @@ chipt/
     ├── config.py        # settings from .env
     ├── schemas.py       # canonical Pydantic models + API contract
     ├── db/              # schema.sql, init, session, ingest_repo (upserts), repository (queries), e2e_fixture (Playwright test athlete)
-    ├── ingest/          # base.py, http.py (PoliteClient), normalise.py, cli.py, providers/<slug>.py (racetec.py = shared RaceTec base)
+    ├── ingest/          # base.py, http.py (PoliteClient), normalise.py, cli.py, file_import.py + import_cli.py (manual import, `chipt-import`), providers/<slug>.py (racetec.py = shared RaceTec base)
     ├── analysis/        # timeseries.py (pandas, pure)
     └── api/             # main.py (FastAPI), openapi.py (schema export for web/)
 ```

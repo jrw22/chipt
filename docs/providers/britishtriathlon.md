@@ -2,7 +2,7 @@
 
 - Site: https://www.britishtriathlon.org (the national governing body). It publishes results for sanctioned events, e.g. [Belvoir Castle Triathlon and Multisport Festival](https://www.britishtriathlon.org/events/results/belvoir-castle-triathlon-and-multisport-festival_17201) (id `17201`).
 - Checked: 2026-11-09 (honest `ChiptBot` UA)
-- **Route: 3, manual import.** The owner saves results pages in a normal browser, and `chipt-import britishtriathlon <file>` parses them. **Not built yet** (V1 phase 2 step 2).
+- **Route: 3, manual import.** The owner saves results pages in a normal browser, and `chipt-import britishtriathlon <files> --date …` parses them. **Built** (V1 phase 2 step 2); waiting for the first real saved race.
 
 ## Findings
 
@@ -11,8 +11,36 @@
 - **Terms of use:** couldn't be read (behind the challenge). Re-check them when the owner saves pages, and before any V2/public use.
 - **Where the results come from:** British Triathlon seems to use different timing firms per event (e.g. Race Timing Systems for a Liverpool championship). Belvoir's organiser, Castle Race Series, links its ≤2024 results to Stuweb (route 5) and 2018–21 French races to Prolivesport. **Belvoir 2025–26 results appear only on British Triathlon**, so tracing back to the source doesn't help for those years.
 
-## Manual import (to build)
+## Manual import (built)
 
-- **Owner action:** open each results page in a browser, use File → Save Page As (HTML only), and put the file in `imports/britishtriathlon/` (gitignored; it contains personal data).
-- **The parser is built from the saved pages.** The event id comes from the page's canonical URL (`…_17201`), and each distance/sport on the page becomes its own `ParsedEvent`, with aquabike/aquathlon labels kept apart from triathlon.
+**How the page works:** an event's results page (e.g. `…_17201`) has a **Result** dropdown with one entry per race. Belvoir 2026 has 17: triathlon Super Sprint/Sprint/Sprint Plus/Starter/Standard/Middle, duathlon, aquabike and aquathlon Sprint/Standard(/Middle), plus junior TriStar/Youth races. The table is filled in by JavaScript, **50 rows per page**, with no option to show more. Columns: Pos, Athlete, Race Category (Open/Female), AG, Club, Overall (finish time), Stage 1, T1, Stage 2, T2, Stage 3, and share links. **The saved page shows neither the event date nor which race was picked**: the dropdown's `selected` option in a saved page is the page default (TriStar 1), not your choice. Splits were blank for the Belvoir 2026 sprint.
+
+**Owner workflow:**
+1. Open the event's results page in your browser and pick your race in **Result**.
+2. Save each 50-row page with File → Save Page As → **"Webpage, Complete"**. ("HTML Only" saves the page before the rows load, so you get an empty table.) Name the files `…-p1.html`, `…-p2.html`, and delete the `_files` folders.
+3. Put them in `imports/BritishTriathlon/` (gitignored).
+4. Check, then import:
+   ```bash
+   uv run chipt-import britishtriathlon imports/BritishTriathlon/belvoir-2026-sprint-p*.html \
+       --date 2026-07-18 --race "Triathlon Sprint" --dry-run
+   uv run chipt-import britishtriathlon imports/BritishTriathlon/belvoir-2026-sprint-p*.html \
+       --date 2026-07-18 --race "Triathlon Sprint"
+   ```
+   **`--race`** names the race: an exact short name like "Triathlon Sprint" (which doesn't match "Sprint Plus"), or its result id (`57561`). Without it, or if it's ambiguous, the importer lists every race on the page. **Import one race per command**, because `--date` and `--race` apply to every file given.
+   ```
+   ```
+
+**What the importer does** (`src/chipt/ingest/providers/britishtriathlon.py`):
+- **One event per race:** `external_id` = `<BT event id>:<race>` (e.g. `17201:triathlon-sprint`). Every saved page of a race lands in the same event, and re-imports are idempotent.
+- **Labels:**
+  - Triathlon: Super Sprint, Sprint, **Sprint Plus**, **Starter**, Standard → **Olympic**, Middle → **Middle Distance (70.3)**.
+  - Duathlon is its own discipline (Middle → "Middle Distance", no 70.3).
+  - Aquabike and aquathlon are filed under triathlon with an **"Aquabike "/"Aquathlon " prefix**, so they're never compared with triathlons.
+  - Junior races are labelled "Tristar N" / "Youth".
+- **Date:** `--date` gives it. If that's a Saturday, races named "… - Sunday" get the next day (and the reverse).
+- **Fields:**
+  - "Race Category" (Open/Female) is stored as published in `gender`, and AG is stored as published in `age_group`.
+  - A non-numeric Pos (DNF/DSQ) with a time → `finisher = false`. Rows without a time are skipped.
+  - Splits and club are kept in `raw` only.
+- **Verified on real data (2026-11-10):** Belvoir 2026 **Triathlon Sprint**, 5 saved pages → 243 results, positions 1–243 complete, imported twice with identical counts (event `17201:triathlon-sprint`). The top 3 Open/Female show AG **"Top3"** instead of an age group (stored as published). No DNFs were listed. Relay rows haven't been seen yet.
 - **Personal use only.** Ask British Triathlon for permission or a feed before V2/public use (see `platform_review.md`, outreach).

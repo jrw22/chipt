@@ -25,6 +25,8 @@ data/
 *.sql.gz
 *.backup
 exports/
+# Owner-saved results pages for chipt-import (personal data)
+imports/
 
 # Logs
 *.log

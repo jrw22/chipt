@@ -7,6 +7,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- Manual import (route 3): `chipt-import <provider> <files> [--date] [--dry-run]`, a network-free `FileImportScraper` base, the `manual` ingest type (added to existing DBs by re-running `chipt-initdb`), and the gitignored `imports/` folder for owner-saved pages.
+- British Triathlon importer: parses saved results pages ("Webpage, Complete", 50 rows per page) into one event per race. It handles Sprint Plus, Starter, Standard → Olympic, Middle, duathlon, aquabike and aquathlon labels, Saturday/Sunday dates from `--date`, and DNFs. `--race` names the race, because saved pages don't record the dropdown choice. First real import: Belvoir 2026 Triathlon Sprint (243 results).
 - IRONMAN provider notes (`docs/providers/ironman.md`): not scrapable (`Claude-User` disallowed; terms forbid scraping and database use, as reported), so the route is the official API, with a user-run API spike next.
 - UK results-platform review (`docs/providers/platform_review.md`): about 30 platforms, triathlon-first, each with robots.txt / terms / bot-protection / delivery evidence and an **access route** (direct scrape, user-run, manual import, trace to source, permission, reject), plus a build shortlist and outreach list. Also `docs/providers/britishtriathlon.md` and the phase 2 plan (`docs/v1_phase2_plan.md`).
 - Playwright smoke test (`web/e2e/`, `npm run test:e2e`): dashboard empty state → find → claim → my results → detail → analysis → dashboard PB → remove + undo. It runs on its own ports as a throwaway test athlete (`python -m chipt.db.e2e_fixture`, which refuses the real athlete id), with fixtures from RaceBest only.
