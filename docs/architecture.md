@@ -19,7 +19,7 @@ Configuration comes from `.env`, loaded by `chipt.config.Settings` (pydantic-set
 ## Data Flow
 
 ```
-provider site ──▶ PoliteClient (robots.txt, rate limit, honest UA, retries, raw cache in SCRAPER_CACHE_DIR)
+provider site ──▶ PoliteClient (robots.txt + rate limit on every redirect hop, honest UA, retries, raw cache in SCRAPER_CACHE_DIR)
               ──▶ Scraper.discover() → fetch(ref) → parse(ref, raw) → [ParsedEvent]
               ──▶ ingest_repo.upsert_*  ──▶ PostgreSQL
 ```

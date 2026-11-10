@@ -60,6 +60,25 @@ class PoliteClient:
             time.sleep(wait)
         self._last_request[host] = time.monotonic()
 
+    MAX_REDIRECTS = 5
+
+    def _follow_redirects(self, resp: httpx.Response) -> httpx.Response:
+        """Follow redirects one hop at a time, applying robots.txt and the rate limit to EVERY host.
+
+        Some platforms (e.g. Eventrac) redirect to an organiser's own domain. Letting httpx follow
+        redirects silently would fetch pages on a host whose robots.txt was never checked.
+        """
+        for _ in range(self.MAX_REDIRECTS):
+            nxt = resp.next_request
+            if not resp.is_redirect or nxt is None:
+                return resp
+            target = str(nxt.url)
+            if not self.allowed(target):
+                raise RobotsDisallowed(f"{resp.request.url} redirects to {target}, which robots.txt disallows")
+            self._throttle(nxt.url.host)
+            resp = self._client.send(nxt, follow_redirects=False)
+        raise httpx.TooManyRedirects("Too many redirects", request=resp.request)
+
     def _cache_path(self, key: str) -> Path:
         return self.cache_dir / f"{hashlib.sha256(key.encode()).hexdigest()[:32]}.cache"
 
@@ -89,7 +108,9 @@ class PoliteClient:
         for attempt in range(1, self.s.scraper_max_retries + 1):
             self._throttle(host)
             try:
-                resp = self._client.request(method, url, params=params, data=data, json=json, headers=headers)
+                resp = self._client.request(method, url, params=params, data=data, json=json, headers=headers,
+                                            follow_redirects=False)
+                resp = self._follow_redirects(resp)
                 if resp.status_code in (429, 500, 502, 503, 504):
                     raise httpx.HTTPStatusError(f"{resp.status_code}", request=resp.request, response=resp)
                 resp.raise_for_status()
