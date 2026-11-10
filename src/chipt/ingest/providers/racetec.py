@@ -7,12 +7,12 @@ organisers under their own subdomains, all with the same URL scheme:
     <base>/results.aspx?CId=<client>&RId=<race>[&EId=<n>]  # results for one race (EId = sub-event)
 
 Each provider is a small subclass in its own module that sets `provider`, `BASE_URL`,
-`CLIENT_ID` and its hand-picked `RACES` (see runthrough.py, eventchiptiming.py).
+`CLIENT_ID` and its hand-picked `RACES` (see runthrough.py, eventchiptiming.py, resultsbase.py).
 
 WHO RUNS THIS — read first
 --------------------------
 The RaceTec results subdomains seen so far (results.runthrough.co.uk,
-results.eventchiptiming.com) publish a robots.txt that disallows AI crawlers *and* AI
+results.eventchiptiming.com, results.resultsbase.net) publish a robots.txt that disallows AI crawlers *and* AI
 agents (ClaudeBot, Claude-User, GPTBot, ...) but has no rule for generic bots. So:
 
 * This code was written WITHOUT fetching or inspecting any RaceTec results page.
@@ -59,11 +59,13 @@ log = logging.getLogger(__name__)
 
 MAX_LISTING_PAGES = 15  # listing is 20 races/page; cap request volume
 MAX_DISCOVERED = 6
-MAX_RESULT_PAGES = 200  # safety cap on results pagination per race
+MAX_RESULT_PAGES = 200  # default safety cap on results pagination per race (subclasses may raise it)
+PROGRESS_EVERY = 25  # log fetch progress every N results pages
 
 # Normalised header text -> canonical field. Exact match after normalisation.
 COLUMN_SYNONYMS: dict[str, list[str]] = {
-    "overall_rank": ["pos", "position", "overall", "overall pos", "overall position", "place", "rank", "no"],
+    "overall_rank": ["pos", "position", "overall", "overall pos", "overall position", "place", "rank", "no",
+                     "net pos", "net position", "chip pos", "chip position"],
     "athlete_name": ["name", "athlete", "runner", "competitor", "participant", "full name", "athlete name"],
     "first_name": ["first name", "firstname", "forename"],
     "last_name": ["last name", "lastname", "surname"],
@@ -71,9 +73,10 @@ COLUMN_SYNONYMS: dict[str, list[str]] = {
     "gun_time": ["gun time", "gun", "official time", "finish time", "time", "race time", "guntime"],
     "gender": ["gender", "sex", "g"],
     "age_group": ["category", "cat", "age group", "age category", "age cat", "agegroup", "age"],
-    "gender_rank": ["gender pos", "gender position", "gen pos", "sex pos", "g pos", "gender rank", "gender place"],
+    "gender_rank": ["gender pos", "gender position", "gen pos", "sex pos", "g pos", "gender rank", "gender place",
+                    "net gender pos", "net gender position", "chip gender pos"],
     "category_rank": ["cat pos", "category pos", "category position", "cat position", "cat rank",
-                      "age group pos", "cat place", "category place"],
+                      "age group pos", "cat place", "category place", "net cat pos", "net category pos"],
     "distance": ["race", "distance", "event", "course", "race name"],
     # One column holding both ranks, e.g. "3 (12)" = 3rd in category, 12th in gender.
     "category_gender_rank": ["cat pos gen pos", "category pos gender pos", "cat pos gender pos"],
@@ -92,6 +95,13 @@ _POSTBACK_ANY = re.compile(r"__doPostBack\(\s*'([^']*)'\s*,\s*'([^']*)'\s*\)")
 # which is what two specs glued together by a missing comma look like).
 _RACE_SPEC = re.compile(r"^\s*(\d+)\s*(?::\s*(\d+))?\s*(?:=\s*([^=]*?))?\s*$")
 _PAGE_PARAM = re.compile(r"^(?:page|pageno|pagenum|pagenumber|pg|p|pn)$", re.I)
+# A category cell that also carries the category position, e.g. "M30-34 1 of 1,204" (resultsbase).
+_CATEGORY_WITH_RANK = re.compile(r"^(.*?\S)\s+(\d[\d,]*)\s+of\s+(\d[\d,]*)$", re.I)
+# Gender prefix of an age category, e.g. "M30-34", "F40-44", "MV45", "FU20", "MS" (used only when
+# the race has no gender column).
+_CATEGORY_GENDER = re.compile(r"^([MFW])(?=[\dSVUJ\-])", re.I)
+# A bib number appended to the name, e.g. "Jane Smith #15795" (resultsbase).
+_NAME_BIB = re.compile(r"\s*#\s*\d+\s*$")
 _RANK_PAIR = re.compile(r"^\s*(\d+)\s*\(\s*(\d+)\s*\)\s*$")
 _TIME_SHAPE = re.compile(r"^\d{1,2}(?::\d{2}){1,2}(?:[.,]\d+)?$")
 _TIME_TOKEN = re.compile(r"\b\d{1,2}(?::\d{2}){1,2}(?:[.,]\d+)?\b")
@@ -185,6 +195,10 @@ def parse_rows(table: Tag, headers: list[str], mapping: dict[int, str]) -> list[
         texts = [_text(c) for c in cells]
         if _POSTBACK.search(str(tr)):  # GridView pager row
             continue
+        # Some sites repeat the header row as a <td> row on every page: drop it silently.
+        if mapping and all(i < len(texts) and _norm_header(texts[i]) == _norm_header(headers[i])
+                           for i in mapping if i < len(headers) and headers[i]):
+            continue
         row = {field: next((texts[i] for i in idxs if i < len(texts) and texts[i]), "")
                for field, idxs in cols.items()}
         row["_raw"] = {(headers[i] if i < len(headers) and headers[i] else f"col{i}"): t
@@ -224,6 +238,21 @@ def extract_race_name(soup: BeautifulSoup, fallback: str | None, default: str = 
         return fallback
     title = soup.find("title")
     return _text(title) if title and _text(title) else default
+
+
+def split_category(value: str | None) -> tuple[str | None, int | None, int | None]:
+    """'M30-34 1 of 1,204' -> ('M30-34', 1, 1204); 'V40' -> ('V40', None, None)."""
+    value = (value or "").strip()
+    m = _CATEGORY_WITH_RANK.match(value)
+    if m:
+        return m.group(1), int(m.group(2).replace(",", "")), int(m.group(3).replace(",", ""))
+    return value or None, None, None
+
+
+def gender_from_category(category: str | None) -> str | None:
+    """'M30-34' -> 'M', 'F40-44' -> 'F'. None when the category doesn't start with a gender letter."""
+    m = _CATEGORY_GENDER.match(category or "")
+    return m.group(1).upper() if m else None
 
 
 def split_rank_pair(value: str | None) -> tuple[int | None, int | None]:
@@ -340,6 +369,8 @@ class RaceTecScraper(BaseScraper):
     RACES: list[str] = []
     # Used only when RACES is empty: discover() scans the race listing for these names.
     RACE_NAME_PATTERNS: list[str] = []
+    # Most results pages to follow per race. Raise it for very big races (e.g. city halves).
+    MAX_RESULT_PAGES: int = MAX_RESULT_PAGES
 
     # -- discovery ---------------------------------------------------------- #
     def results_url(self, rid: str, eid: str | None = None) -> str:
@@ -424,11 +455,16 @@ class RaceTecScraper(BaseScraper):
         pages = [self.http.get(ref.url)]
         page_url, current = ref.url, 1
         seen_bodies = {_table_fingerprint(pages[0])}
-        while len(pages) < MAX_RESULT_PAGES:
+        while True:
             soup = BeautifulSoup(pages[-1], "html.parser")
             # Next page = smallest page number greater than the current one (handles "..." links).
             nxt = next((p for p in pager_links(soup, page_url, ref.meta.get("rid", "")) if p["page"] > current), None)
             if nxt is None:
+                break
+            if len(pages) >= self.MAX_RESULT_PAGES:
+                log.warning("%s: stopped at the %d-page cap with more pages left; results are TRUNCATED. "
+                            "Raise MAX_RESULT_PAGES on %s.", ref.external_id, self.MAX_RESULT_PAGES,
+                            type(self).__name__)
                 break
             if nxt["kind"] == "get":
                 html = self.http.get(nxt["url"])
@@ -450,6 +486,8 @@ class RaceTecScraper(BaseScraper):
             seen_bodies.add(fp)
             pages.append(html)
             current = nxt["page"]
+            if len(pages) % PROGRESS_EVERY == 0:
+                log.info("%s: fetched %d results pages so far", ref.external_id, len(pages))
         log.info("Fetched %d results page(s) for %s", len(pages), ref.external_id)
         return pages
 
@@ -549,7 +587,7 @@ class RaceTecScraper(BaseScraper):
         for r in rows:
             try:
                 name = r.get("athlete_name") or f"{r.get('first_name', '')} {r.get('last_name', '')}"
-                name = clean_name(name)
+                name = clean_name(_NAME_BIB.sub("", name))  # the bib stays in raw
                 chip = cell_time_seconds(r.get("chip_time"))
                 gun = cell_time_seconds(r.get("gun_time"))
                 seconds = chip or gun
@@ -564,11 +602,18 @@ class RaceTecScraper(BaseScraper):
                 raw = dict(r["_raw"])
                 raw["_time_source"] = "chip" if chip else "gun"
                 cat_rank, gen_rank = split_rank_pair(r.get("category_gender_rank"))
+                age_group, cell_cat_rank, cat_size = split_category(r.get("age_group"))
+                if cell_cat_rank is not None:
+                    cat_rank = cat_rank or cell_cat_rank
+                    raw["_category_size"] = cat_size
+                gender = r.get("gender") or None
+                if gender is None and (gender := gender_from_category(age_group)):
+                    raw["_gender_from_category"] = True
                 out.append(ResultIn(
                     athlete_name=name,
                     chip_time_seconds=seconds,
-                    gender=r.get("gender") or None,
-                    age_group=r.get("age_group") or None,
+                    gender=gender,
+                    age_group=age_group,
                     overall_rank=to_int(r.get("overall_rank")),
                     gender_rank=to_int(r.get("gender_rank")) if r.get("gender_rank") else gen_rank,
                     category_rank=to_int(r.get("category_rank")) if r.get("category_rank") else cat_rank,
@@ -606,9 +651,17 @@ def helper_cli(scraper_cls: type[RaceTecScraper]) -> None:
     try:
         if args.cmd == "list":
             pat = re.compile(args.match, re.I) if args.match else None
-            for r in s.list_races(args.pages):
-                if not pat or pat.search(r["name"]):
-                    print(f"{r['rid']:>8}  {r['name']}  |  {r['row_text'][:80]}")
+            races = s.list_races(args.pages)
+            # Match the whole listing row, not just the link: some sites' link text is just "Results".
+            hits = [r for r in races if not pat or pat.search(r["name"]) or pat.search(r["row_text"])]
+            for r in hits:
+                print(f"{r['rid']:>8}  {r['name']}  |  {r['row_text'][:100]}")
+            print(f"\n{len(hits)} of {len(races)} race(s) matched, from up to {args.pages} listing page(s)"
+                  + ("" if hits or len(races) < args.pages * 20 else "; try a larger --pages"))
+            if pat and not hits and races:
+                print("Link-text shapes of the first races scanned (no values, safe to share):")
+                for r in races[:5]:
+                    print(f"   RId {r['rid']}: link={cell_shape(r['name'])}, row={cell_shape(r['row_text'])}")
         else:
             ref = s.ref_from_url(args.url)
             pages = s.fetch(ref)

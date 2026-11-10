@@ -202,7 +202,7 @@ For MVP the providers are (decided after the §8 feasibility spike):
 * **UKResults** (https://www.ukresults.net): ingested. Static HTML, one page per race per year.
 * RunThrough (https://results.runthrough.co.uk): scraper written but **user-run only**. robots.txt opts out of AI agents, and its data is excluded from future LLM features.
 * Event Chip Timing (https://results.eventchiptiming.com): scraper written but **user-run only**. It's a RaceTec site with the same AI-agent opt-out as RunThrough, and both share one RaceTec base scraper.
-* resultsbase.net: **blocked**. Results pages sit behind a Cloudflare Turnstile challenge. A stub scraper remains until access is granted.
+* resultsbase.net: the `www` host (Sportstiming) is **blocked** by a Cloudflare Turnstile challenge. Its RaceTec host, `results.resultsbase.net`, is **user-run only** (same AI-agent opt-out as RunThrough) and shares the RaceTec base scraper (V1, 2026-11-10).
 
 ### 5.6 Search & identity resolution
 
@@ -267,7 +267,7 @@ For MVP the providers are (decided after the §8 feasibility spike):
 - **V1 testing:** light automated checks: `npm run check` plus a Playwright smoke test run against the local DB as a throwaway test athlete. §6
 - **MVP identity:** single hardcoded profile. §4
 - **MVP deployment:** local-only (Docker Postgres + local FastAPI/Streamlit). §6
-- **MVP providers:** RaceBest and UKResults are ingested. RunThrough and Event Chip Timing are user-run only (AI opt-out in robots.txt). resultsbase is blocked by a Cloudflare challenge. Never bypass bot checks or AI opt-outs. §5.5, §8
+- **MVP providers:** RaceBest and UKResults are ingested. RunThrough and Event Chip Timing are user-run only (AI opt-out in robots.txt). resultsbase's www host is blocked by a Cloudflare challenge (its RaceTec results host is user-run, added in V1). Never bypass bot checks or AI opt-outs. §5.5, §8
 
 ---
 
@@ -294,9 +294,10 @@ Never bypass bot checks, CAPTCHAs or AI opt-outs. Data from AI-opted-out provide
 | RunThrough, Event Chip Timing | 2 (built) | RaceTec; robots.txt opts out of AI agents, generic bots allowed |
 | Net Timing, Race Timing Solutions, Timing Up North | 2 (cheap via `racetec.py`) | RaceTec; AI opt-out |
 | Its Your Race, Timeoutdoors, Opentrack, Fetch Everyone, British Cycling | 2 (terms to check) | AI agents opted out |
-| IRONMAN | 5 → official API (spike next) | `Claude-User` disallowed; terms forbid scraping and database use (as reported); official API portal with sign-up |
+| IRONMAN | Manual entry (5 for a feed) | `Claude-User` disallowed; terms forbid scraping and database use (as reported); API portal lists no APIs (2026-11-10) |
 | British Triathlon | 3 (built: `chipt-import`) | Cloudflare challenge on every page; robots.txt otherwise allows results |
-| resultsbase, UK Triathlon, Sports Timing Solutions | 3 | Turnstile / Cloudflare / JS+cookie gate (resultsbase also opts out `ClaudeBot`) |
+| resultsbase (www), UK Triathlon, Sports Timing Solutions | 3 | Turnstile / Cloudflare / JS+cookie gate (resultsbase also opts out `ClaudeBot`) |
+| resultsbase RaceTec host (results.resultsbase.net) | 2 (built) | RaceTec; AI opt-out; no terms published |
 | Castle Race Series | 4 | Organiser; links to Stuweb (≤2024) and British Triathlon |
 | Stuweb, Sporthive (MYLAPS), Webscorer, World Triathlon | 5 | Terms forbid copying or automated collection |
 | RaceResult, Sportsystems, Power of 10 / runbritain, Athlinks | 5 | robots.txt disallows results / login required / terms unverifiable |
