@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- **More races from the route-1 providers** (re-checked robots.txt first). RaceBest 12 → 58 events (Vale of York back to 2014, Harrogate Tri back to 2017, plus Tad Tri, Skipton, Bassenthwaite, Coquet River triathlons and Mouth of the Tyne Aquathlon). UKResults 7 → 70 (Guy Fawkes, 13 Arches, Dalby Dash, Richmond Castle, Haweswater, Hesketh Duathlon, Darley Moor May/Sept). Eventrac 28 → 113 (Hove Prom, Reading, Sheffield, Sandown & Shanklin 10Ks; Chelmsford Marathon/Half; Tissington, Folkestone Halfs; Eridge Park, Stebbing 10 Milers). The DB now holds 246 events and 85,669 results; name search stays under 0.35 s.
 - Eventrac provider (route 1): reads each event's results index (dates, race names) and the static results tables. Ingested Lancing 10K (2021–26), Worthing Seafront 10K (2023–26) and Bedgebury Forest Half Marathon + 10K (2017–26): 28 events, 6,312 results. Anonymised athletes are skipped by design; a bare "Time" is stored as `unspecified`.
 - Manual import (route 3): `chipt-import <provider> <files> [--date] [--dry-run]`, a network-free `FileImportScraper` base, the `manual` ingest type (added to existing DBs by re-running `chipt-initdb`), and the gitignored `imports/` folder for owner-saved pages.
 - British Triathlon importer: parses saved results pages ("Webpage, Complete", 50 rows per page) into one event per race. It handles Sprint Plus, Starter, Standard → Olympic, Middle, duathlon, aquabike and aquathlon labels, Saturday/Sunday dates from `--date`, and DNFs. `--race` names the race, because saved pages don't record the dropdown choice. First real import: Belvoir 2026 Triathlon Sprint (243 results).
@@ -45,6 +46,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Streamlit UI with three pages: Find & Claim, My Results and Analysis (time-series chart, PB/trend tiles, pace).
 
 ### Changed
+- Older page formats now parse. **RaceBest:** "Contest"/"EventDescr" distance columns (previously merged 10K into half-marathon events; the three affected events were rebuilt), "Full name", chip/gun position columns, "Half" contests, int/null cells, and per-race `distance` hints. **UKResults:** Forename/Surname tables, "Cat/Pos", "Overall" as the finish time. **Eventrac:** per-event `DISTANCE_HINTS`.
+- e2e fixture query: names that appear once are found with one `GROUP BY` instead of a correlated subquery. It ran over 5 minutes at 85k results and now takes about 0.1 s.
+- Normaliser: **aquathlon** (swim + run) is now multi-sport (filed under triathlon, with an "Aquathlon …" label prefix like aquabike) instead of swimming. Plural sport names ("Duathlons", "Triathlons") are recognised.
 - `PoliteClient` follows redirects one hop at a time and checks robots.txt and the rate limit on **every** hop. Before this, httpx followed redirects silently, so a redirect to an unchecked host would have been fetched.
 - Spec §8: the MVP's accept/reject rule is replaced by access routes, and the provider table now lists every reviewed platform with its route. V1 phase 2 is redefined: the API-feeds shift is deferred. resultsbase now also opts out `ClaudeBot`/`GPTBot`, and Sporthive's robots.txt now allows results (but the MYLAPS terms forbid copying).
 - `CORS_ALLOWED_ORIGINS` now defaults to the web app only (`http://localhost:3000`). Next.js `distDir` can be overridden with `NEXT_DIST_DIR`, so the smoke test's dev server doesn't clash with yours.

@@ -27,14 +27,17 @@ TEST_NAME_PREFIX = "E2E test athlete"
 # A finished RaceBest single-discipline result whose athlete name appears exactly once in
 # the whole database, so a name search finds exactly one candidate to claim.
 _FIXTURE_SQL = """
+    WITH unique_names AS (  -- names that appear exactly once in the whole DB (one pass, not per row)
+        SELECT lower(athlete_name) AS lname FROM result GROUP BY 1 HAVING count(*) = 1
+    )
     SELECT r.id AS result_id, r.athlete_name AS name, e.name AS event_name,
            e.discipline::text AS discipline, e.distance_label
       FROM result r
+      JOIN unique_names u ON u.lname = lower(r.athlete_name)
       JOIN event e ON e.id = r.event_id
       JOIN provider p ON p.id = e.provider_id
      WHERE p.slug = 'racebest' AND r.finisher AND r.overall_rank IS NOT NULL
        AND e.distance_km IS NOT NULL AND length(r.athlete_name) >= 8
-       AND (SELECT count(*) FROM result x WHERE lower(x.athlete_name) = lower(r.athlete_name)) = 1
      ORDER BY e.event_date DESC, r.overall_rank
      LIMIT 1
 """

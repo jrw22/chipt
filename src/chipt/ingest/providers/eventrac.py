@@ -42,7 +42,21 @@ EVENTS: list[str] = [
     "lancing-10k-3750",                            # Lancing 10K, 6 years
     "worthing-seafront-10k-3733",                  # Worthing Seafront 10K, 4 years
     "bedgebury-forest-half-marathon-and-10k-9257",  # Bedgebury Forest Half Marathon + 10K
+    "hove-prom-10k-9600",                           # Hove Prom 10K, 2015-2026
+    "reading-town-10k-charity-3742",                # Reading Town 10K, 2021-2026
+    "sheffield-city-10k-charity-fun-run-3732",      # Sheffield City 10K, 2021-2026
+    "sandown-and-shanklin-i-o-w-seafront-10k-3738",  # Sandown & Shanklin (Isle of Wight) 10K, 2021-2026
+    "chelmsford-marathon-and-half-marathon-9483",   # Chelmsford Marathon + Half, 2016-2026
+    "tissington-trail-half-marathon-weekend-9222",  # Tissington Trail Half Marathon, 2014-2026
+    "folkestone-rotary-half-marathon-9459",         # Folkestone Half Marathon, 2012-2026
+    "eridge-park-10-trail-challenge-9457",          # Eridge Park 10 Mile Trail, 2017-2026
+    "stebbing-10-10036",                            # Stebbing 10 Mile, 2021-2026
 ]
+# Distance hints for events whose race names and title don't state a distance
+# (e.g. Eridge Park's older races are named just "2021"; the title says "10" without a unit).
+DISTANCE_HINTS: dict[str, str] = {
+    "eridge-park-10-trail-challenge-9457": "10 mile",
+}
 # Races on an index whose name matches this are skipped (not adult comparison races).
 SKIP_RACES = re.compile(r"\bjunior|\bkids?\b|fun run|\bfamily\b|canicross|\bwalk\b|1\s*mile", re.I)
 
@@ -130,6 +144,8 @@ class EventracScraper(BaseScraper):
         label, km = normalise_distance(discipline, race)
         if label is None:
             label, km = normalise_distance(discipline, title)
+        if label is None and ref.meta["slug"] in DISTANCE_HINTS:
+            label, km = normalise_distance(discipline, DISTANCE_HINTS[ref.meta["slug"]])
         if label is None:
             log.error("%s: unknown distance for %r; skipping", ref.url, race)
             return []

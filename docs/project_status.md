@@ -30,7 +30,7 @@
 - **IRONMAN API spike** (next, owner-paced): the owner signs up at the IRONMAN API Portal and checks the API terms. Then the agent builds the first `api` provider on the user-run pattern (see `docs/providers/ironman.md`)
 - V1 phase 2, step 2 (built on `feature/manual-import`, stacked on PR #8): `chipt-import` + British Triathlon importer. **Belvoir 2026 Triathlon Sprint imported** (243 results, idempotent)
 - V1 phase 2, step 3 on `feature/provider-eventrac` (stacked on PR #9): **Eventrac** built and ingested (28 events, 6,312 results). race-results.co.uk is parked by the owner
-- V1 phase 2, step 4: more RaceBest/UKResults races
+- V1 phase 2, step 4 on `feature/more-races`: route-1 providers expanded to 241 events (RaceBest 58, UKResults 70, Eventrac 113); 85,669 results in total
 - Later: API feeds (deferred), advanced analysis, better search
 - RunThrough: the owner runs the scraper by hand (`list` → pin RIds → `dump` → ingest)
 
