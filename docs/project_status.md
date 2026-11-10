@@ -32,12 +32,12 @@
 - V1 phase 2, step 3 on `feature/provider-eventrac` (stacked on PR #9): **Eventrac** built and ingested (28 events, 6,312 results). race-results.co.uk is parked by the owner
 - V1 phase 2, step 4 on `feature/more-races`: route-1 providers expanded to 241 events (RaceBest 58, UKResults 70, Eventrac 113); 85,669 results in total
 - Later: API feeds (deferred), advanced analysis, better search
-- **Cambridge Half Marathon 2025** (resultsbase RaceTec, `feature/provider-resultsbase-racetec`, stacked on `feature/manual-entry`): scraper built and checked offline on 330 synthetic pages. **Owner to run** `dump`, then `chipt-ingest resultsbase` twice
+- **Cambridge Half Marathon 2022-2026** (resultsbase RaceTec, `feature/provider-resultsbase-racetec`, stacked on `feature/manual-entry`): owner-run ingest done 2026-11-10, 61,756 results across five years, idempotent on re-run. Next: push and open a PR
 - RunThrough: the owner runs the scraper by hand (`list` → pin RIds → `dump` → ingest)
 
 ## Blockers / open questions
 - **IRONMAN** has no usable API (the portal lists none), and its site is closed to scraping and imports. Results come in by manual entry. Asking IRONMAN for a feed is optional (outreach item 0).
-- **resultsbase.net**: the `www` host is blocked by Cloudflare Turnstile and opts out `ClaudeBot`/`GPTBot` (route: manual import, or ask). The RaceTec host `results.resultsbase.net` is user-run (built 2026-11-10). It's unverified whether that host has a bot challenge, because the agent can't fetch results pages there.
+- **resultsbase.net**: the `www` host is blocked by Cloudflare Turnstile and opts out `ClaudeBot`/`GPTBot` (route: manual import, or ask). The RaceTec host `results.resultsbase.net` is user-run (built 2026-11-10). The owner's runs on 2026-11-10 met no bot challenge.
 - **British Triathlon** (the owner's priority for triathlon) is behind Cloudflare on every page. Route: manual import (phase 2 step 2); ask for a feed before V2.
 - **Outreach list** (British Triathlon, Stuweb + Castle Race Series, MYLAPS, RaceResult, UK Athletics): see `platform_review.md`. Not sent yet; the owner decides.
 - **RunThrough** has opted out of AI agents. The owner runs the scraper, and its data stays out of LLM features. Asking for a feed is still the cleanest route.

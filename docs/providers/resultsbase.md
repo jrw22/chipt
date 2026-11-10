@@ -4,7 +4,7 @@
 - Platform: white-label of the Sportstiming (sportstiming.dk) platform
 - Feasibility spike: 2026-11-08 (www host); RaceTec host checked 2026-11-10
 - **Status: two hosts, two verdicts.**
-  - **`results.resultsbase.net` (RaceTec): route 2, user-run scrape.** `src/chipt/ingest/providers/resultsbase.py` is a thin subclass of the shared RaceTec base. A person runs it, not an AI agent. **Its data must stay out of LLM features and test fixtures.** First race pinned: Cambridge Half Marathon 2025.
+  - **`results.resultsbase.net` (RaceTec): route 2, user-run scrape.** `src/chipt/ingest/providers/resultsbase.py` is a thin subclass of the shared RaceTec base. A person runs it, not an AI agent. **Its data must stay out of LLM features and test fixtures.** Pinned: Cambridge Half Marathon 2022-2026 (61,756 results in total, owner-run 2026-11-10).
   - **`www.resultsbase.net` (Sportstiming): blocked** (Cloudflare Turnstile). Not scraped. The findings below are kept as history.
 
 ## RaceTec host: results.resultsbase.net (2026-11-10)
@@ -34,7 +34,7 @@ uv run chipt-ingest resultsbase      # again: the counts must match (idempotent)
   - The category is split into `age_group` (`M30-34`, as published) and `category_rank`, with the field size kept in `raw._category_size`.
   - Gender is taken from the category's M/F prefix, flagged `raw._gender_from_category`, and only used when there's no gender column.
   - Repeated header rows are dropped silently.
-- **Pinned:** TTP Cambridge Half Marathon 2022 (RId 337), 2023 (20184), 2024 (20401), 2025 (20708, ingested: 13,565 results, two identical runs) and 2026 (21012), all as EId 1. Tour of Cambridgeshire (20321) is cycling and isn't pinned.
+- **Pinned and ingested (owner-run, 2026-11-10; two runs with identical counts):** TTP Cambridge Half Marathon 2022 (RId 337, 9,913 results), 2023 (20184, 11,396), 2024 (20401, 12,793), 2025 (20708, 13,565) and 2026 (21012, 14,089), all as EId 1. Each year's `dump` showed the same column layout. Tour of Cambridgeshire (20321) is cycling and isn't pinned.
 - To add years, pin them in `RACES` as `"<RId>:<EId>=Half Marathon"`.
 - **Config:** `PROVIDER_RESULTSBASE_RESULTS_URL` (default `https://results.resultsbase.net`). The old `PROVIDER_RESULTSBASE_BASE_URL` is no longer read, so you can delete it from `.env`.
 

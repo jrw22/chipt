@@ -8,7 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - **resultsbase RaceTec scraper** (`results.resultsbase.net`, CId 8), user-run only because of the RaceTec AI-agent opt-out. It replaces the blocked Sportstiming stub, keeps the `resultsbase` slug, and pins the Cambridge Half Marathon 2025 (`20708:1`, 16,000+ results, ~330 pages). New setting `PROVIDER_RESULTSBASE_RESULTS_URL`, which replaces `PROVIDER_RESULTSBASE_BASE_URL`.
-- resultsbase: pinned Cambridge Half Marathon 2022, 2023, 2024 and 2026 alongside 2025, for a five-year time series.
+- resultsbase: pinned Cambridge Half Marathon 2022, 2023, 2024 and 2026 alongside 2025, for a five-year time series. Owner-run ingest on 2026-11-10: 61,756 results across the five years (9,913 / 11,396 / 12,793 / 13,565 / 14,089), with identical counts on a second run.
 - RaceTec `list` helper: `--match` now searches the whole listing row as well as the link text (some links just say "Results"). It prints a matched/scanned summary, and shows value-free link shapes when nothing matches.
 - RaceTec base, from the first resultsbase `dump`:
   - recognises `Net Pos` / `Net Gender Pos` (plus net/chip variants) as overall and gender rank
